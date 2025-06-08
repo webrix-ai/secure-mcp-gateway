@@ -3,6 +3,8 @@ import { ExpressAuth } from "@auth/express"
 import dotenv from "dotenv"
 import { authSession } from "./session"
 import { getAuthProvider } from "./libs/auth"
+import { getMcpClient } from "./services/mcp-client"
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse"
 dotenv.config()
 
 const app = express()
@@ -22,6 +24,27 @@ app.get("/", (_req, res) => {
   res.send({
     message: "Hello from MCP-S",
     session,
+  })
+})
+
+app.get("/tools", async (req, res) => {
+  const { session } = res.locals
+  if (!session?.user?.email) {
+    res.status(401).send({ error: "Unauthorized" })
+    return
+  }
+
+  const transport = new SSEClientTransport(
+    new URL("https://gitmcp.io/modelcontextprotocol/typescript-sdk"),
+  )
+  // also works with stdio transport
+  // const transport = new StdioClientTransport({
+  //   command: "node",
+  //   args: ["server.js"],
+  // })
+  const client = await getMcpClient(transport)
+  res.send({
+    tools: await client.listTools(),
   })
 })
 
