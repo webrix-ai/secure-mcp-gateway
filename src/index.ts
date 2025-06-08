@@ -18,7 +18,7 @@ app.get("/", (_req, res) => {
   res.send("Hello from Express + TypeScript!")
 })
 
-export default app;
+export default app
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = process.env.PORT || 3000
