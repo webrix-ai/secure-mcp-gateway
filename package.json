@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/webrix-ai/mcp-gateway#readme",
   "dependencies": {
+    "@auth/express": "^0.10.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0"
   },
