@@ -1,7 +1,8 @@
 import express from "express"
 import { ExpressAuth } from "@auth/express"
-import Google from "@auth/express/providers/google"
 import dotenv from "dotenv"
+import { authSession } from "./session"
+import { getAuthProvider } from "./libs/auth"
 dotenv.config()
 
 const app = express()
@@ -12,10 +13,16 @@ app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.use("/auth", ExpressAuth({ providers: [Google] }))
+app.use("/auth", ExpressAuth({ providers: [await getAuthProvider()] }))
+
+app.use(authSession)
 
 app.get("/", (_req, res) => {
-  res.send("Hello from Express + TypeScript!")
+  const { session } = res.locals
+  res.send({
+    message: "Hello from MCP-S",
+    session,
+  })
 })
 
 export default app
