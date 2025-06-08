@@ -48,7 +48,7 @@ mcp-gateway supports authentication with **any OAuth provider** using [Auth.js](
 
 ### Example: Google
 
-```
+```env
 AUTH_SECRET=your-random-secret
 AUTH_PROVIDER=google
 AUTH_GOOGLE_ID=your-google-client-id
@@ -57,7 +57,7 @@ AUTH_GOOGLE_SECRET=your-google-client-secret
 
 ### Example: Okta
 
-```
+```env
 AUTH_SECRET=your-random-secret
 AUTH_PROVIDER=okta
 AUTH_OKTA_ID=your-okta-client-id
@@ -67,7 +67,7 @@ AUTH_OKTA_ISSUER=https://your-okta-domain.okta.com/oauth2/default
 
 ### Example: Azure-AD
 
-```
+```env
 AUTH_SECRET=your-random-secret
 AUTH_PROVIDER=azure-ad
 AUTH_AZURE_AD_ID=your-azure-client-id

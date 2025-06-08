@@ -10,6 +10,7 @@ export const getAuthProvider = async (): Promise<
   } catch (error) {
     console.error(
       `Provider ${provider} not found, using default google provider`,
+      error,
     )
     const googleModule = await import("@auth/express/providers/google")
     return googleModule.default
