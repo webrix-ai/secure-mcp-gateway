@@ -2,7 +2,7 @@ import express from "express"
 import { ExpressAuth } from "@auth/express"
 import dotenv from "dotenv"
 import { authSession } from "./session"
-import { getAuthProvider } from "./libs/auth"
+import { getAuthProvider, getAuthProviderName } from "./libs/auth"
 import {
   findClientByName,
   getAllClients,
@@ -11,6 +11,7 @@ import {
 import fs from "fs"
 import { Client } from "@modelcontextprotocol/sdk/client/index"
 import { MCPTool } from "./types/tools.types"
+import { signTokens } from "./libs/tokens"
 dotenv.config()
 
 const app = express()
@@ -46,12 +47,6 @@ try {
 }
 
 app.get("/tools", async (req, res) => {
-  const { session } = res.locals
-  if (!session?.user?.email) {
-    res.status(401).send({ error: "Unauthorized" })
-    return
-  }
-
   const toolMap = new Map<string, MCPTool>()
 
   await Promise.all(
@@ -74,6 +69,46 @@ app.get("/tools", async (req, res) => {
   res.send({
     data: Array.from(toolMap.values()),
   })
+})
+
+app.post("/generate-auth-url", async (req, res) => {
+  const auth = req.headers["authorization"]!
+  const [userAccessKey, token] = auth.split(":")
+
+  const tokenSignature = signTokens({
+    userAccessKey,
+    token,
+  })
+
+  const callbackUrl = encodeURIComponent(
+    `${process.env.AUTH_URL}/authorized?token=${tokenSignature}`,
+  )
+
+  res.send({
+    data: {
+      url: `${process.env.AUTH_URL}/auth/signin?callbackUrl=${callbackUrl}`,
+    },
+  })
+})
+
+app.post("/call/:integrationSlug/:toolSlug", async (req, res) => {
+  const { integrationSlug, toolSlug } = req.params
+  const auth = req.headers["authorization"]!
+  const [userAccessKey, token] = auth.split(":")
+  // TODO: validate userAccessKey and token
+
+  const client = await findClientByName(integrationSlug)
+
+  if (!client) {
+    res.status(404).send({ error: "Client not found" })
+  }
+
+  const toolResponse = await client.callTool({
+    name: toolSlug,
+    arguments: req.body,
+  })
+
+  res.send(toolResponse)
 })
 
 export default app
