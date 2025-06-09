@@ -7,10 +7,9 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "tsx src/index.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "postinstall": "npm run build",
     "test": "node --test --experimental-transform-types"
   },
   "repository": {
