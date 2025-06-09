@@ -81,12 +81,12 @@ app.post("/generate-auth-url", async (req, res) => {
   })
 
   const callbackUrl = encodeURIComponent(
-    `${process.env.AUTH_URL}/authorized?token=${tokenSignature}`,
+    `${process.env.BASE_URL}/authorized?token=${tokenSignature}`,
   )
 
   res.send({
     data: {
-      url: `${process.env.AUTH_URL}/auth/signin?callbackUrl=${callbackUrl}`,
+      url: `${process.env.BASE_URL}/auth/signin?callbackUrl=${callbackUrl}`,
     },
   })
 })
