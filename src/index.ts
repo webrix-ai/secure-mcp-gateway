@@ -3,8 +3,14 @@ import { ExpressAuth } from "@auth/express"
 import dotenv from "dotenv"
 import { authSession } from "./session"
 import { getAuthProvider } from "./libs/auth"
-import { getMcpClient } from "./services/mcp-client"
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse"
+import {
+  findClientByName,
+  getAllClients,
+  loadMcpServers,
+} from "./services/mcp-client"
+import fs from "fs"
+import { Client } from "@modelcontextprotocol/sdk/client/index"
+import { MCPTool } from "./types/tools.types"
 dotenv.config()
 
 const app = express()
@@ -27,6 +33,18 @@ app.get("/", (_req, res) => {
   })
 })
 
+try {
+  const mcpServersJsonFile = process.argv.includes("--mcpServersJsonFile")
+    ? process.argv[process.argv.indexOf("--mcpServersJsonFile") + 1]
+    : "./mcp.json"
+
+  const mcpServers = await fs.promises.readFile(mcpServersJsonFile, "utf-8")
+
+  await loadMcpServers(JSON.parse(mcpServers))
+} catch (error) {
+  console.error("No valid MCP servers found", error)
+}
+
 app.get("/tools", async (req, res) => {
   const { session } = res.locals
   if (!session?.user?.email) {
@@ -34,17 +52,27 @@ app.get("/tools", async (req, res) => {
     return
   }
 
-  const transport = new SSEClientTransport(
-    new URL("https://gitmcp.io/modelcontextprotocol/typescript-sdk"),
+  const toolMap = new Map<string, MCPTool>()
+
+  await Promise.all(
+    (await getAllClients()).map(async ({ name, client }) => {
+      const { tools } = await client.listTools()
+      tools.forEach((tool) => {
+        toolMap.set(`${name}:${tool.name}`, {
+          name: tool.name,
+          slug: tool.name,
+          description: tool.description,
+          inputSchema: (tool.inputSchema as MCPTool["inputSchema"]) || {
+            type: "object",
+          },
+          integrationSlug: name,
+        })
+      })
+    }),
   )
-  // also works with stdio transport
-  // const transport = new StdioClientTransport({
-  //   command: "node",
-  //   args: ["server.js"],
-  // })
-  const client = await getMcpClient(transport)
+
   res.send({
-    tools: await client.listTools(),
+    data: Array.from(toolMap.values()),
   })
 })
 
