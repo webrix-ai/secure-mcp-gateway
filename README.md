@@ -20,22 +20,10 @@
 
 ### Features
 
-- **Enterprise-grade Security**: Secure SSO authentication for all MCP interactions (works with any OAuth provider via [Auth.js](https://authjs.dev))
-- **On-Premise Hosting**: Deploy within your own infrastructure for maximum control and compliance
-- **20+ Pre-built Connectors**: Fast plug-and-play integration with hundreds of tools
-- **Roles & Permissions**: Granular access control with custom role definitions
-- **Custom Tools**: Build and integrate your own tools with a flexible API
-- **API ➜ MCP**: Seamlessly build MCP tools from any API, maintaining a secure connection
+- **Self-Hosted Gateway**: Deploy within your own infrastructure for maximum control
+- **OAuth Authentication**: Secure authentication with any OAuth provider via [Auth.js](https://authjs.dev)
 - **TypeScript Support**: Fully typed for robust development
-- **Scalable & Reliable**: Designed for enterprise and organizational use
-
-**Compatible with all MCP Hosts:**
-<p align="left">
-  <img src="https://cursor.sh/brand/icon.svg" alt="Cursor" width="24" height="24" style="margin-right: 10px;">
-  <img src="https://code.visualstudio.com/assets/images/code-stable.png" alt="VS Code" width="24" height="24" style="margin-right: 10px;">
-  <img src="https://windsurf-ai.com/favicon.ico" alt="Windsurf" width="24" height="24" style="margin-right: 10px;">
-  <img src="https://claude.ai/favicon.ico" alt="Claude" width="24" height="24" style="margin-right: 10px;">
-</p>
+- **Open Source**: MIT licensed and community-driven
 
 **Supports all MCP Connection Types:**
 - **STDIO**: Standard input/output MCP servers
@@ -44,7 +32,12 @@
 
 ### How To Use
 
-1. **Create MCP configuration file** (`mcp.json`):
+1. **Start the gateway**:
+   ```bash
+   npm install && npm run start
+   ```
+
+2. **Configure your MCP servers** - Create `mcp.json` file in your project:
    ```json
    {
      "mcpServers": {
@@ -59,13 +52,22 @@
    }
    ```
 
-2. **Start the gateway**:
-   ```bash
-   npm run start
+3. **Add to your MCP configuration**:
+   
+   **For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
+   ```json
+   {
+     "mcpServers": {
+       "mcp-gateway": {
+         "command": "npx",
+         "args": ["-y", "@mcp-s/mcp"],
+         "env": {
+           "BASE_URL": "http://localhost:3000"
+         }
+       }
+     }
+   }
    ```
-
-3. **Connect to the MCP**:
-   Configure your MCP host to connect to the gateway using your `BASE_URL` (default: `http://localhost:3000`)
 
 ### Deploy
 
@@ -151,7 +153,9 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 Visit **[mcp-s.com](https://www.mcp-s.com)** for our fully managed hosting solution with advanced features:
 
 - **Zero Configuration**: Get started in seconds without any setup
-- **Enterprise SSO**: Advanced authentication and user management
+- **Enterprise-grade Security**: Advanced SSO authentication for all MCP interactions
+- **20+ Pre-built Connectors**: Fast plug-and-play integration with hundreds of tools
+- **Roles & Permissions**: Granular access control with custom role definitions
 - **Monitoring & Analytics**: Real-time insights into your MCP usage
 - **High Availability**: 99.9% uptime SLA with global CDN
 - **Premium Support**: Direct access to our engineering team
