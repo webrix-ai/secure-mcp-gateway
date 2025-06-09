@@ -1,12 +1,12 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index"
-import { Transport } from "@modelcontextprotocol/sdk/shared/transport"
-import { McpServers } from "../types/mcpServers.types"
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse"
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp"
+import { Client } from "@modelcontextprotocol/sdk/client/index.js"
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js"
+import type { McpServers } from "../types/mcpServers.types.ts"
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js"
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import {
   getDefaultEnvironment,
   StdioClientTransport,
-} from "@modelcontextprotocol/sdk/client/stdio"
+} from "@modelcontextprotocol/sdk/client/stdio.js"
 
 const mcpClients: Record<string, Client> = {}
 
@@ -21,11 +21,11 @@ export const getMcpClient = async (transport: Transport) => {
   return client
 }
 
-export const findClientByName = async (name: string) => {
+export const findClientByName = (name: string) => {
   return mcpClients[name]
 }
 
-export const getAllClients = async () => {
+export const getAllClients = () => {
   return Object.entries(mcpClients).map(([name, client]) => ({
     name,
     client,

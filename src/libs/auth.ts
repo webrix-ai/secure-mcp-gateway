@@ -1,12 +1,8 @@
-import { AuthConfig } from "@auth/core"
-
 export const getAuthProviderName = () => {
   return process.env.AUTH_PROVIDER?.toLowerCase() || "google"
 }
 
-export const getAuthProvider = async (): Promise<
-  AuthConfig["providers"][0]
-> => {
+export const getAuthProvider = async () => {
   const provider = getAuthProviderName()
   try {
     const module = await import(`@auth/express/providers/${provider}`)

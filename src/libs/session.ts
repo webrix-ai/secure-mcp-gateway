@@ -1,6 +1,6 @@
 import { getSession } from "@auth/express"
-import { NextFunction, Request, Response } from "express"
-import { getAuthProvider } from "./libs/auth"
+import type { NextFunction, Request, Response } from "express"
+import { getAuthProvider } from "./auth.ts"
 
 export async function authSession(
   req: Request,
