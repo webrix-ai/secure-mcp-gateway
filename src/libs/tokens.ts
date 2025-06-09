@@ -17,3 +17,24 @@ export const signTokens = ({
     ),
   )
 }
+
+export const verifyToken = (signedToken: string) => {
+  let tokenPayload: { userAccessKey: string; token: string; signature: string }
+  try {
+    const decodedToken = Buffer.from(signedToken, "base64").toString("utf-8")
+    tokenPayload = JSON.parse(decodedToken)
+  } catch (error) {
+    console.error(error)
+    throw new Error("Invalid token format")
+  }
+
+  const hmac = createHmac("sha256", process.env.AUTH_SECRET!)
+  hmac.update(`${tokenPayload.userAccessKey}:${tokenPayload.token}`)
+  const expectedSignature = hmac.digest("base64url")
+
+  if (tokenPayload.signature !== expectedSignature) {
+    throw new Error("Invalid token signature")
+  }
+
+  return tokenPayload
+}
