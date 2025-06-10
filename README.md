@@ -4,7 +4,7 @@
 <h1 align="center">MCP-S Gateway<br/><small>secure, open-source MCP authentication &amp; OAuth gateway</small></h1>
 
 <p align="center">
-  Gateway + integration layer for the <strong>Model Context Protocol (MCP)</strong> – perfect for “<em>mcp auth open source github</em>” and “<em>mcp oauth example</em>” searches.
+  Gateway + integration layer for the <strong>Model Context Protocol (MCP)</strong> 
 </p>
 
 <p align="center">
@@ -21,10 +21,10 @@
 Searching for **“mcp gateway github”**, **“mcp sso open source example”**, or **“model context protocol sso”** usually leads developers to scattered scripts or closed-source proxies.  
 **MCP-S Gateway** changes that: an MIT-licensed, TypeScript-first project that drops into any stack and provides a **self-hosted, OAuth-ready, SSO gateway** for every MCP server you run.
 
-> **Quick facts**  
-> • 100 % open source – no hidden paywalls  
-> • Works with Auth.js (80+ OAuth providers) for true *MCP OAuth login*  
-> • Ships as an npm script; deploy with PM2, Docker, Kubernetes, or plain `node`  
+=**Quick facts**  
+• 100 % open source – no hidden paywalls  
+• Works with Auth.js (80+ OAuth providers) for true *MCP OAuth login*  
+• Ships as an npm script; deploy with PM2, Docker, Kubernetes, or plain `node`  
 
 ---
 
