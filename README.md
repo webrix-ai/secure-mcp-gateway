@@ -1,166 +1,152 @@
 <p align="center">
-  <a href="https://www.mcp-s.com" target="_blank"><img height="96px" src="https://www.mcp-s.com/logo.png" alt="mcp-gateway logo" /></a>
-  <h1 align="center">MCP-S: MCP Gateway</h1>
+  <a href="https://www.mcp-s.com" target="_blank"><img height="96" src="https://www.mcp-s.com/logo.png" alt="MCP-Gateway logo" /></a>
 </p>
+<h1 align="center">MCP-S Gateway<br/><small>secure, open-source MCP authentication &amp; OAuth gateway</small></h1>
+
 <p align="center">
-  Gateway and integration layer for MCP (Model Context Protocol).
+  Gateway + integration layer for the <strong>Model Context Protocol (MCP)</strong> – perfect for “<em>mcp auth open source github</em>” and “<em>mcp oauth example</em>” searches.
 </p>
+
 <p align="center">
-  <a href="https://github.com/webrix-ai/mcp-gateway/blob/main/LICENSE"><img src="https://img.shields.io/github/license/webrix-ai/mcp-gateway?style=flat-square&color=green" alt="MCP Gateway is released under the MIT license" /></a>
-  <a href="https://www.npmjs.com/package/@mcp-s/mcp"><img src="https://img.shields.io/npm/v/@mcp-s/mcp?style=flat-square&label=latest&color=purple" alt="npm latest release" /></a>
-  <a href="https://www.npmtrends.com/@mcp-s/mcp"><img src="https://img.shields.io/npm/dm/@mcp-s/mcp?style=flat-square&color=cyan" alt="Downloads" /></a>
-  <a href="https://github.com/webrix-ai/mcp-gateway/stargazers"><img src="https://img.shields.io/github/stars/webrix-ai/mcp-gateway?style=flat-square&color=orange" alt="GitHub Stars" /></a>
+  <a href="https://github.com/webrix-ai/mcp-gateway/blob/main/LICENSE"><img src="https://img.shields.io/github/license/webrix-ai/mcp-gateway?style=flat-square&color=green" alt="MIT license" /></a>
+  <a href="https://www.npmjs.com/package/@mcp-s/mcp"><img src="https://img.shields.io/npm/v/@mcp-s/mcp?style=flat-square&label=npm&color=purple" alt="npm latest" /></a>
+  <a href="https://www.npmtrends.com/@mcp-s/mcp"><img src="https://img.shields.io/npm/dm/@mcp-s/mcp?style=flat-square&color=cyan" alt="npm downloads" /></a>
+  <a href="https://github.com/webrix-ai/mcp-gateway/stargazers"><img src="https://img.shields.io/github/stars/webrix-ai/mcp-gateway?style=flat-square&color=orange" alt="GitHub stars" /></a>
 </p>
 
 ---
 
-### MCP-S Gateway
+## Why MCP-S Gateway?
 
-**mcp-gateway** is a secure gateway and integration layer for the **Model Context Protocol (MCP)**. It provides a unified, enterprise-ready interface for connecting, managing, and extending MCP modules and services, with a focus on security and seamless integration.
+Searching for **“mcp gateway github”**, **“mcp sso open source example”**, or **“model context protocol sso”** usually leads developers to scattered scripts or closed-source proxies.  
+**MCP-S Gateway** changes that: an MIT-licensed, TypeScript-first project that drops into any stack and provides a **self-hosted, OAuth-ready, SSO gateway** for every MCP server you run.
 
-### Features
+> **Quick facts**  
+> • 100 % open source – no hidden paywalls  
+> • Works with Auth.js (80+ OAuth providers) for true *MCP OAuth login*  
+> • Ships as an npm script; deploy with PM2, Docker, Kubernetes, or plain `node`  
 
-- **Self-Hosted Gateway**: Deploy within your own infrastructure for maximum control
-- **OAuth Authentication**: Secure authentication with any OAuth provider via [Auth.js](https://authjs.dev)
-- **TypeScript Support**: Fully typed for robust development
-- **Open Source**: MIT licensed and community-driven
+---
 
-**Supports all MCP Connection Types:**
-- **STDIO**: Standard input/output MCP servers
-- **SSE**: Server-Sent Events for real-time communication
-- **StreamableHTTP**: HTTP-based streaming connections
+## Features <!-- mcp auth open source / mcp authentication keywords baked in -->
 
-### How To Use
+| Capability | Details |
+|------------|---------|
+| **Self-Hosted Gateway** | Keep data inside your infra – ideal for “mcp auth open source android / python” use cases. |
+| **OAuth / SSO** | Plug in any provider from [Auth.js](https://authjs.dev) – Google, Okta, Azure AD, etc. |
+| **TypeScript Types** | Fully typed API and config for safe DX. |
+| **Supports All MCP Connection Types** | **STDIO**, **SSE**, **StreamableHTTP** – no extra adapters. |
+| **MIT License** | Fork, extend, embed – zero restriction. |
 
-1. **Start the gateway**:
-   ```bash
-   npm install && npm run start
-   ```
+---
 
-2. **Configure your MCP servers** - Create `mcp.json` file in your project:
-   ```json
-   {
-     "mcpServers": {
-       "your-server": {
-         "command": "npx",
-         "args": ["-y", "@your-mcp-server"],
-         "env": {
-           "API_KEY": "your-api-key"
-         }
-       }
-     }
-   }
-   ```
+## Quick Start – *“mcp oauth tutorial” style*
 
-3. **Add to your MCP configuration**:
-   
-   **For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
-   ```json
-   {
-     "mcpServers": {
-       "mcp-gateway": {
-         "command": "npx",
-         "args": ["-y", "@mcp-s/mcp"],
-         "env": {
-           "BASE_URL": "http://localhost:3000"
-         }
-       }
-     }
-   }
-   ```
+```bash
+# 1 – install & run
+npm install && npm run start   # ships with sensible defaults (PORT 3000)
 
-### Deploy
+# 2 – create mcp.json (register your own servers)
+# see example below
 
-The deployment process is the same as local usage:
+mcp.json template (drop in root of your project):
 
-1. Set up your environment variables (see [Advanced Configuration](#advanced-configuration))
-2. Create your `mcp.json` configuration file
-3. Run `npm run start`
+{
+  "mcpServers": {
+    "my-secure-server": {
+      "command": "npx",
+      "args": ["-y", "@acme/mcp-server"],
+      "env": { "API_KEY": "your-api-key" }
+    }
+  }
+}
 
-For production deployments, consider using:
-- Process managers like PM2
-- Container orchestration (Docker, Kubernetes)
-- Cloud platforms (Heroku, Railway, Render)
+Connect IDEs / AI terminals
 
-### Authentication Setup
+Cursor / Claude Desktop / VS Code:
 
-<a href="https://authjs.dev" target="_blank"><img width="32px" style="vertical-align:middle; margin-right:8px;" src="https://authjs.dev/img/logo-sm.png" alt="Auth.js logo" /></a>
+{
+  "mcpServers": {
+    "mcp-gateway": {
+      "command": "npx",
+      "args": ["-y", "@mcp-s/mcp"],
+      "env": { "BASE_URL": "http://localhost:3000" }
+    }
+  }
+}
 
-mcp-gateway supports authentication with **any OAuth provider** using [Auth.js](https://authjs.dev). Simply set the `AUTH_PROVIDER` environment variable and provide the required credentials for your provider.
+Now every tool behind mcp-gateway is reachable with single-sign-on.
 
-<details>
-<summary>Google OAuth Setup</summary>
+⸻
 
-**Documentation**: [Auth.js Google Provider](https://authjs.dev/reference/core/providers/google)
+Deployment Cheatsheet – great for “mcp gateway example”
 
-```env
-AUTH_SECRET=your-random-secret
+Target	Command
+PM2	pm2 start npm --name mcp-gateway -- run start
+Docker	docker build -t mcp-gateway . && docker run -p 3000:3000 mcp-gateway
+Kubernetes	Use the provided k8s/deployment.yaml manifest (edit secrets).
+Heroku ∕ Railway ∕ Render	One-click import; set env vars in dashboard.
+
+
+⸻
+
+OAuth / SSO Setup
+
+MCP-S Gateway relies on Auth.js – the de-facto open-source MCP OAuth library.
+
+<details><summary>Google OAuth</summary>
+
+
 AUTH_PROVIDER=google
-AUTH_GOOGLE_ID=your-google-client-id
-AUTH_GOOGLE_SECRET=your-google-client-secret
-```
+AUTH_SECRET=change-me
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
 
 </details>
 
-<details>
-<summary>Okta OAuth Setup</summary>
 
-**Documentation**: [Auth.js Okta Provider](https://authjs.dev/reference/core/providers/okta)
+<details><summary>Okta OAuth</summary>
 
-```env
-AUTH_SECRET=your-random-secret
+
 AUTH_PROVIDER=okta
-AUTH_OKTA_ID=your-okta-client-id
-AUTH_OKTA_SECRET=your-okta-client-secret
-AUTH_OKTA_ISSUER=https://your-okta-domain.okta.com/oauth2/default
-```
+AUTH_OKTA_ID=...
+AUTH_OKTA_SECRET=...
+AUTH_OKTA_ISSUER=https://your-domain.okta.com/oauth2/default
 
 </details>
 
-<details>
-<summary>Azure AD OAuth Setup</summary>
 
-**Documentation**: [Auth.js Azure AD Provider](https://authjs.dev/reference/core/providers/azure-ad)
+(Any Auth.js provider works – Facebook, GitHub, Azure AD, Keycloak, etc.)
 
-```env
-AUTH_SECRET=your-random-secret
-AUTH_PROVIDER=azure-ad
-AUTH_AZURE_AD_ID=your-azure-client-id
-AUTH_AZURE_AD_SECRET=your-azure-client-secret
-AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
-```
+⸻
 
-</details>
+Advanced Configuration
 
-> For other providers, see the [Auth.js Providers documentation](https://authjs.dev/reference/core/providers/).
+ENV	Description	Default
+PORT	HTTP port	3000
+BASE_URL	Public URL (used by OAuth callbacks)	http://localhost:3000
+AUTH_SECRET	Token‐signing key	required
+AUTH_PROVIDER	e.g. google, okta, azure-ad	google
+DB_PATH	SQLite DB file	./mcp.sqlite
+TOKEN_EXPIRATION_TIME	JWT TTL (ms)	86400000
 
-### Advanced Configuration
 
-| Environment Variable | Description | Default Value | Required |
-|---------------------|-------------|---------------|----------|
-| `PORT` | Server port | `3000` | No |
-| `BASE_URL` | Base URL for the gateway | `http://localhost:3000` | No |
-| `AUTH_SECRET` | Secret for signing/encrypting tokens (generate with `openssl rand -base64 33`) | - | Yes |
-| `AUTH_PROVIDER` | OAuth provider name | `google` | No |
-| `TOKEN_EXPIRATION_TIME` | Token expiration time in milliseconds | `86400000` (24h) | No |
-| `DB_PATH` | SQLite database file path | `./mcp.sqlite` | No |
-| `AUTH_[Provider]_ID` | OAuth client ID for your provider | - | Yes |
-| `AUTH_[Provider]_SECRET` | OAuth client secret for your provider | - | Yes |
-| `AUTH_[Provider]_*` | Additional provider-specific variables (see [Auth.js documentation](https://authjs.dev/reference/core/providers/)) | - | Varies |
+⸻
 
-### Hosted Solution
+Hosted Edition 
 
-Visit **[mcp-s.com](https://www.mcp-s.com)** for our fully managed hosting solution with advanced features:
+Prefer zero-ops? mcp-s.com runs MCP-S Gateway for you – click, connect, done.
 
-- **Zero Configuration**: Get started in seconds without any setup
-- **Enterprise-grade Security**: Advanced SSO authentication for all MCP interactions
-- **20+ Pre-built Connectors**: Fast plug-and-play integration with hundreds of tools
-- **Roles & Permissions**: Granular access control with custom role definitions
-- **Monitoring & Analytics**: Real-time insights into your MCP usage
-- **High Availability**: 99.9% uptime SLA with global CDN
-- **Premium Support**: Direct access to our engineering team
-- **Custom Integrations**: Build and deploy custom MCP connectors
+⸻
 
-### License
+Demo & Video
+	•	Live Demo: coming soon (https://demo.mcp-s.com)
+	•	5-Minute Tutorial Video: coming soon – watch a full “mcp oauth login” flow.
 
-[MIT](./LICENSE)
+⸻
+
+License
+
+Released under the MIT License. Contributions welcome – star & fork!
+
+⸻
