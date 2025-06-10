@@ -184,7 +184,7 @@ Have questions? Need help getting started? Want to share your MCP setup?
 
 Join our Discord community where developers are actively helping each other with MCP gatway implementations, troubleshooting, and sharing best practices.
 
-**[Join our Discord →](https://discord.gg/mcp-s)**  TODO: ADD LINK
+**[Join our Discord →](https://discord.gg/ZhehX4Ku)**
 
 
 ### License
