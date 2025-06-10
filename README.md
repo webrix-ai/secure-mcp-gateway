@@ -1,9 +1,10 @@
 <p align="center">
-  <a href="https://www.mcp-s.com" target="_blank"><img height="96px" src="https://www.mcp-s.com/logo.png" alt="mcp-gateway logo" /></a>
-  <h1 align="center">MCP-S: MCP Gateway</h1>
+  <a href="https://www.mcp-s.com?utm_source=github&utm_medium=readme&utm_campaign=mcp-gateway&utm_content=header_logo" target="_blank"><img height="96px" src="https://www.mcp-s.com/logo.png" alt="mcp-gateway logo" /></a>
+  <h1 align="center">MCP-S Gateway<br/>
+A secure, open-source OAuth gateway for MCP authentication</h1>
 </p>
 <p align="center">
-  Gateway and integration layer for MCP (Model Context Protocol).
+  Gateway + integration layer for the <strong>Model Context Protocol (MCP)</strong> 
 </p>
 <p align="center">
   <a href="https://github.com/webrix-ai/mcp-gateway/blob/main/LICENSE"><img src="https://img.shields.io/github/license/webrix-ai/mcp-gateway?style=flat-square&color=green" alt="MCP Gateway is released under the MIT license" /></a>
@@ -24,6 +25,8 @@
 - **OAuth Authentication**: Secure authentication with any OAuth provider via [Auth.js](https://authjs.dev)
 - **TypeScript Support**: Fully typed for robust development
 - **Open Source**: MIT licensed and community-driven
+
+<video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video> TODO: ADD OUR VIDEO
 
 **Supports all MCP Connection Types:**
 - **STDIO**: Standard input/output MCP servers
@@ -69,9 +72,21 @@
    }
    ```
 
+   **Connect with your preferred AI client:**
+
+   | Client | Link |
+   |--------|------|
+   | <img src="https://claude.ai/favicon.ico" alt="Claude" width="14" height="14"> **Claude** | [claude.ai](https://claude.ai) |
+   | <img src="https://www.cursor.com/favicon.ico" alt="Cursor"  width="14" height="14"> **Cursor** | [cursor.com](https://cursor.com) |
+   | <img src="https://codeium.com/favicon.ico" alt="Windsurf"  width="14" height="14"> **Windsurf** | [codeium.com/windsurf](https://codeium.com/windsurf) |
+   | <img src="https://code.visualstudio.com/assets/favicon.ico" alt="VSCode" width="14" height="14"> **VSCode** | [code.visualstudio.com](https://code.visualstudio.com/) |
+   | <img src="https://cline.bot/assets/icons/favicon-256x256.png" alt="Cline"  width="14" height="14"> **Cline** | [cline.tools](https://cline.tools) |
+   | <img src="https://highlightai.com/favicon.ico" alt="Highlight AI"  width="14" height="14"> **Highlight AI** | [highlightai.com](https://highlightai.com) |
+   | <img src="https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png" alt="Augment Code" width="14" height="14"> **Augment Code** | [augmentcode.com](https://augmentcode.com) |
+
 ### Deploy
 
-The deployment process is the same as local usage:
+Deploy the mcp-s gateway using the same simple steps as local setup:
 
 1. Set up your environment variables (see [Advanced Configuration](#advanced-configuration))
 2. Create your `mcp.json` configuration file
@@ -86,7 +101,9 @@ For production deployments, consider using:
 
 <a href="https://authjs.dev" target="_blank"><img width="32px" style="vertical-align:middle; margin-right:8px;" src="https://authjs.dev/img/logo-sm.png" alt="Auth.js logo" /></a>
 
-mcp-gateway supports authentication with **any OAuth provider** using [Auth.js](https://authjs.dev). Simply set the `AUTH_PROVIDER` environment variable and provide the required credentials for your provider.
+mcp-gateway leverages the power of [Auth.js](https://authjs.dev), which supports **80+ OAuth providers** out of the box. This makes Auth.js the perfect companion for an open-source project like mcp-gateway. Both libraries share the same commitment to flexibility, security, and developer experience. By integrating with Auth.js, we avoid reinventing authentication wheels and instead provide you with battle-tested, production-ready OAuth flows that work seamlessly across providers.
+
+Simply set the `AUTH_PROVIDER` environment variable and provide the required credentials for your chosen provider - mcp-gateway handles the rest.
 
 <details>
 <summary>Google OAuth Setup</summary>
@@ -150,7 +167,7 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 
 ### Hosted Solution
 
-Visit **[mcp-s.com](https://www.mcp-s.com)** for our fully managed hosting solution with advanced features:
+Visit **[mcp-s.com](https://www.mcp-s.com?utm_source=github&utm_medium=readme&utm_campaign=mcp-gateway&utm_content=hosted_solution_link)** for our fully managed hosting solution with advanced features:
 
 - **Zero Configuration**: Get started in seconds without any setup
 - **Enterprise-grade Security**: Advanced SSO authentication for all MCP interactions
@@ -161,6 +178,15 @@ Visit **[mcp-s.com](https://www.mcp-s.com)** for our fully managed hosting solut
 - **Premium Support**: Direct access to our engineering team
 - **Custom Integrations**: Build and deploy custom MCP connectors
 
+### Community
+
+Have questions? Need help getting started? Want to share your MCP setup?
+
+Join our Discord community where developers are actively helping each other with MCP gatway implementations, troubleshooting, and sharing best practices.
+
+**[Join our Discord →](https://discord.gg/mcp-s)**  TODO: ADD LINK
+
+
 ### License
 
-[MIT](./LICENSE)
+Released under the [MIT](./LICENSE) License. Contributions welcome - star & fork!
