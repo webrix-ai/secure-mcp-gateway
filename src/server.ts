@@ -5,18 +5,24 @@ import { authSession } from "./libs/session.ts"
 import { getAuthProvider } from "./libs/auth.ts"
 import { findClientByName, getAllClients } from "./services/mcp-client.ts"
 import type { MCPTool } from "./types/tools.types.ts"
-import { signTokens, verifyToken } from "./libs/tokens.ts"
+import {
+  signTokens,
+  TOKEN_EXPIRATION_TIME,
+  verifyToken,
+} from "./libs/tokens.ts"
 import { getUserByTokens, upsertUser } from "./services/db.ts"
 import path from "path"
+import mcpRouter from "./routes/mcp.ts"
 dotenv.config()
-
-const TOKEN_EXPIRATION_TIME: number = process.env.TOKEN_EXPIRATION_TIME
-  ? parseInt(process.env.TOKEN_EXPIRATION_TIME)
-  : 1000 * 60 * 60 * 24
 
 const app = express()
 
 app.use(express.json())
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`)
+  next()
+})
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" })
@@ -28,12 +34,34 @@ app.use("/auth", ExpressAuth({ providers: [await getAuthProvider()] }))
 app.use(authSession)
 
 app.get("/authorized", (req, res) => {
-  const { token: tokenFromQuery } = req.query as { token: string }
-  const { userAccessKey, token } = verifyToken(tokenFromQuery)
   const { session } = res.locals
   const email = session?.user?.email
-  if (!email || !userAccessKey || !token) {
+  if (!email) {
     res.status(401).send({ error: "Unauthorized" })
+  }
+  const {
+    token: tokenFromQuery,
+    clientId,
+    code,
+    callbackUrl,
+  } = req.query as {
+    token?: string
+    clientId?: string
+    code?: string
+    callbackUrl?: string
+  }
+  let userAccessKey: string = ""
+  let token: string = ""
+  if (tokenFromQuery) {
+    const paredToken = verifyToken(tokenFromQuery)
+    userAccessKey = paredToken.userAccessKey!
+    token = paredToken.token!
+    if (!userAccessKey || !token) {
+      res.status(401).send({ error: "Unauthorized" })
+    }
+  } else if (code) {
+    userAccessKey = clientId!
+    token = code!
   }
 
   upsertUser({
@@ -43,8 +71,16 @@ app.get("/authorized", (req, res) => {
     token_expired_at: Date.now() + TOKEN_EXPIRATION_TIME,
   })
 
+  if (callbackUrl) {
+    res.redirect(callbackUrl)
+    return
+  }
+
   res.sendFile(path.join(process.cwd(), "src", "pages", "authorized.html"))
 })
+
+// MCP Streamable Http
+app.use(mcpRouter)
 
 app.get("/", (_req, res) => {
   const { session } = res.locals

@@ -8,11 +8,19 @@ db.exec(`
     email TEXT PRIMARY KEY,
     user_access_key TEXT NOT NULL,
     token TEXT NOT NULL,
-    token_expired_at INTEGER NOT NULL
+    token_expired_at INTEGER NOT NULL,
+    refresh_token TEXT,
+    access_token TEXT,
+    access_token_expired_at INTEGER
   )
 `)
 
-export function upsertUser({ email, user_access_key, token, token_expired_at }: {
+export function upsertUser({
+  email,
+  user_access_key,
+  token,
+  token_expired_at,
+}: {
   email: string
   user_access_key: string
   token: string
@@ -24,8 +32,47 @@ export function upsertUser({ email, user_access_key, token, token_expired_at }: 
      ON CONFLICT(email) DO UPDATE SET
        user_access_key=excluded.user_access_key,
        token=excluded.token,
-       token_expired_at=excluded.token_expired_at`
+       token_expired_at=excluded.token_expired_at`,
   ).run(email, user_access_key, token, token_expired_at)
+}
+
+export function updateOAuthTokensByCode({
+  user_access_key,
+  token,
+  access_token,
+  access_token_expired_at,
+  refresh_token,
+}: {
+  user_access_key: string
+  token: string
+  access_token: string
+  access_token_expired_at: number
+  refresh_token: string
+}) {
+  db.prepare(
+    `UPDATE users SET access_token = ?, access_token_expired_at = ?, refresh_token = ? WHERE user_access_key = ? AND token = ?`,
+  ).run(
+    access_token,
+    access_token_expired_at,
+    refresh_token,
+    user_access_key,
+    token,
+  )
+}
+export function updateOAuthTokensByRefreshToken({
+  user_access_key,
+  access_token,
+  access_token_expired_at,
+  refresh_token,
+}: {
+  user_access_key: string
+  access_token: string
+  access_token_expired_at: number
+  refresh_token: string
+}) {
+  db.prepare(
+    `UPDATE users SET access_token = ?, access_token_expired_at = ? WHERE user_access_key = ? AND refresh_token = ?`,
+  ).run(access_token, access_token_expired_at, user_access_key, refresh_token)
 }
 
 export function getUserByEmail(email: string) {
@@ -33,6 +80,7 @@ export function getUserByEmail(email: string) {
 }
 
 export function getUserByTokens(user_access_key: string, token: string) {
-  return db.prepare("SELECT * FROM users WHERE user_access_key = ? AND token = ?").get(user_access_key, token)
+  return db
+    .prepare("SELECT * FROM users WHERE user_access_key = ? AND token = ?")
+    .get(user_access_key, token)
 }
-
