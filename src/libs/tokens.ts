@@ -1,4 +1,10 @@
 import { createHmac } from "crypto"
+import dotenv from "dotenv"
+dotenv.config()
+
+export const TOKEN_EXPIRATION_TIME: number = process.env.TOKEN_EXPIRATION_TIME
+  ? parseInt(process.env.TOKEN_EXPIRATION_TIME)
+  : 60 * 60 * 24
 
 export const signTokens = ({
   userAccessKey,
