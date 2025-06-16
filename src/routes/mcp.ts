@@ -8,6 +8,7 @@ import {
   isInitializeRequest,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js"
+import type { Tool } from "@modelcontextprotocol/sdk/types.js"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import dotenv from "dotenv"
 import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js"
@@ -90,7 +91,11 @@ mcpRouter.use(
       },
       authorize: async (
         client: OAuthClientInformationFull,
-        params: any,
+        params: {
+          codeChallenge: string
+          redirectUri: string
+          state: string
+        },
         res: Response,
       ) => {
         console.log("authorize called with", { client, params })
@@ -249,7 +254,7 @@ mcpRouter.post("/mcp", async (req, res) => {
             },
           }
         }
-        const toolMap = new Map<string, any>()
+        const toolMap = new Map<string, Tool>()
 
         await Promise.all(
           getAllClients().map(async ({ client }) => {
