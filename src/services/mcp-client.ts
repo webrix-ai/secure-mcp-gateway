@@ -7,6 +7,7 @@ import {
   getDefaultEnvironment,
   StdioClientTransport,
 } from "@modelcontextprotocol/sdk/client/stdio.js"
+import { Tool } from "@modelcontextprotocol/sdk/types.js"
 
 const mcpClients: Record<string, Client> = {}
 
@@ -23,6 +24,14 @@ export const getMcpClient = async (transport: Transport) => {
 
 export const findClientByName = (name: string) => {
   return mcpClients[name]
+}
+
+export const findClientByToolName = (toolName: string) => {
+  return Object.values(mcpClients).find((client) =>
+    client
+      .listTools()
+      .then(({ tools }) => tools.some((tool) => tool.name === toolName)),
+  )
 }
 
 export const getAllClients = () => {

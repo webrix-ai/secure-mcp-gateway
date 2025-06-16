@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express"
+import express, { Router, Request, Response } from "express"
 import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js"
 import { randomUUID } from "node:crypto"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
@@ -6,6 +6,7 @@ import {
   CallToolRequestSchema,
   isInitializeRequest,
   ListToolsRequestSchema,
+  Tool,
 } from "@modelcontextprotocol/sdk/types.js"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import dotenv from "dotenv"
@@ -15,16 +16,43 @@ import { TOKEN_EXPIRATION_TIME } from "../libs/tokens"
 import {
   updateOAuthTokensByCode,
   updateOAuthTokensByRefreshToken,
+  getUserByAccessToken,
 } from "../services/db"
-import { verifyChallenge } from "pkce-challenge"
+import { findClientByToolName, getAllClients } from "../services/mcp-client"
 dotenv.config()
 
 const mcpRouter = Router()
+mcpRouter.use(express.json())
+mcpRouter.use(express.urlencoded())
 
 const clients = new Map<string, OAuthClientInformationFull>()
 
 // Helper to store PKCE codes and challenges
 const pkceStore = new Map<string, { codeChallenge: string; clientId: string }>()
+
+function isPermitted(req: Request) {
+  const authorization = req.headers["authorization"]
+  if (!authorization || typeof authorization !== "string") {
+    return false
+  }
+  // Expecting format: Bearer <token>
+  const match = authorization.match(/^Bearer (.+)$/)
+  if (!match) {
+    return false
+  }
+  const accessToken = match[1]
+  const user = getUserByAccessToken(accessToken)
+  if (!user) {
+    return false
+  }
+  if (
+    !user.access_token_expired_at ||
+    Number(user.access_token_expired_at) < Date.now()
+  ) {
+    return false
+  }
+  return true
+}
 
 function saveAuthorizationCode({
   code,
@@ -36,27 +64,6 @@ function saveAuthorizationCode({
   clientId: string
 }) {
   pkceStore.set(code, { codeChallenge, clientId })
-}
-
-async function verifyCodeChallenge({
-  code,
-  codeVerifier,
-}: {
-  code: string
-  codeVerifier: string
-}): Promise<boolean> {
-  const entry = pkceStore.get(code)
-  if (!entry) return false
-  const { codeChallenge } = entry
-  // Use pkce-challenge library for verification
-  const valid = await verifyChallenge(codeVerifier, codeChallenge)
-  console.log("verifyCodeChallenge", {
-    code,
-    codeVerifier,
-    storedChallenge: codeChallenge,
-    valid,
-  })
-  return valid
 }
 
 mcpRouter.use(
@@ -89,7 +96,6 @@ mcpRouter.use(
         console.log("authorize called with", { client, params })
         // Redirect with code and state on success
         const code = crypto.randomBytes(32).toString("hex")
-        console.log("code", code)
         // Save the code and PKCE challenge
         if (params.codeChallenge) {
           saveAuthorizationCode({
@@ -133,18 +139,6 @@ mcpRouter.use(
           codeVerifier,
           redirectUri,
         })
-        // // Verify PKCE code challenge
-        // if (codeVerifier) {
-        //   const valid = await verifyCodeChallenge({
-        //     code: authorizationCode,
-        //     codeVerifier,
-        //   })
-        //   if (!valid) {
-        //     throw new Error(
-        //       "Invalid code_verifier for the given code (PKCE validation failed)",
-        //     )
-        //   }
-        // }
 
         const refreshToken = crypto.randomBytes(32).toString("hex")
         const accessToken = crypto.randomBytes(32).toString("hex")
@@ -199,12 +193,7 @@ mcpRouter.use(
 )
 
 // Map to store transports by session ID
-const transports: {
-  [sessionId: string]: {
-    transport: StreamableHTTPServerTransport
-    userEmail?: string
-  }
-} = {}
+const transports: Record<string, StreamableHTTPServerTransport> = {}
 
 // Handle POST requests for client-to-server communication
 mcpRouter.post("/mcp", async (req, res) => {
@@ -214,7 +203,7 @@ mcpRouter.post("/mcp", async (req, res) => {
 
   if (sessionId && transports[sessionId]) {
     // Reuse existing transport
-    transport = transports[sessionId]?.transport
+    transport = transports[sessionId]
   } else if (!sessionId && isInitializeRequest(req.body)) {
     // New initialization request
     transport = new StreamableHTTPServerTransport({
@@ -222,7 +211,7 @@ mcpRouter.post("/mcp", async (req, res) => {
       onsessioninitialized: (sessionId) => {
         console.log("onsessioninitialized called with", { sessionId })
         // Store the transport by session ID
-        transports[sessionId] = { transport }
+        transports[sessionId] = transport
       },
     })
 
@@ -247,17 +236,38 @@ mcpRouter.post("/mcp", async (req, res) => {
     server.setRequestHandler(
       ListToolsRequestSchema,
       async (request, { authInfo }) => {
-        console.log("ListToolsRequestSchema called with", { request, authInfo })
-        return {
-          tools: [
-            {
-              name: "get-user",
-              description: "Get user information",
-              inputSchema: {
-                type: "object",
-              },
+        console.log(
+          "ListToolsRequestSchema called with",
+          { request, authInfo },
+          req.headers["authorization"],
+        )
+        if (!isPermitted(req)) {
+          return {
+            error: {
+              code: -32000,
+              message: "Unauthorized",
             },
-          ],
+          }
+        }
+        const toolMap = new Map<string, Tool>()
+
+        await Promise.all(
+          getAllClients().map(async ({ client }) => {
+            const { tools } = await client.listTools()
+            tools.forEach((tool) => {
+              toolMap.set(tool.name, {
+                // TODO use name
+                name: tool.name,
+                description: tool.description,
+                inputSchema: tool.inputSchema || {
+                  type: "object",
+                },
+              })
+            })
+          }),
+        )
+        return {
+          tools: Array.from(toolMap.values()),
         }
       },
     )
@@ -265,10 +275,35 @@ mcpRouter.post("/mcp", async (req, res) => {
     server.setRequestHandler(
       CallToolRequestSchema,
       async (request, { authInfo }) => {
-        console.log("CallToolRequestSchema called with", { request, authInfo })
-        return {
-          result: "Hello World",
+        console.log(
+          "CallToolRequestSchema called with",
+          { request, authInfo },
+          req.headers["authorization"],
+        )
+
+        if (!isPermitted(req)) {
+          return {
+            error: {
+              code: -32000,
+              message: "Unauthorized",
+            },
+          }
         }
+        const client = findClientByToolName(request.params.name)
+        if (!client) {
+          return {
+            error: {
+              code: -32000,
+              message: "Tool not found",
+            },
+          }
+        }
+        const toolResponse = await client.callTool({
+          name: request.params.name,
+          arguments: request.params.arguments,
+        })
+
+        return toolResponse
       },
     )
 
@@ -287,6 +322,10 @@ mcpRouter.post("/mcp", async (req, res) => {
     return
   }
 
+  if (!req.headers["authorization"]) {
+    res.status(401).send("unauthorized")
+    return
+  }
   // Handle the request
   await transport.handleRequest(req, res, req.body)
 })
@@ -294,16 +333,18 @@ mcpRouter.post("/mcp", async (req, res) => {
 // Reusable handler for GET and DELETE requests
 const handleSessionRequest = async (req: Request, res: Response) => {
   const sessionId = req.headers["mcp-session-id"] as string | undefined
+
   if (!sessionId || !transports[sessionId]) {
     res.status(400).send("Invalid or missing session ID")
     return
   }
-
-  const { transport, userEmail } = transports[sessionId]
-  if (!userEmail) {
+  if (!req.headers["authorization"]) {
     res.status(401).send("unauthorized")
     return
   }
+
+  const transport = transports[sessionId]
+
   await transport.handleRequest(req, res)
 }
 

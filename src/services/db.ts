@@ -84,3 +84,7 @@ export function getUserByTokens(user_access_key: string, token: string) {
     .prepare("SELECT * FROM users WHERE user_access_key = ? AND token = ?")
     .get(user_access_key, token)
 }
+
+export function getUserByAccessToken(access_token: string) {
+  return db.prepare("SELECT * FROM users WHERE access_token = ?").get(access_token)
+}
