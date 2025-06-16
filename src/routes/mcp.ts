@@ -1,4 +1,5 @@
-import express, { Router, Request, Response } from "express"
+import express, { Router } from "express"
+import type { Request, Response } from "express"
 import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js"
 import { randomUUID } from "node:crypto"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
@@ -6,19 +7,18 @@ import {
   CallToolRequestSchema,
   isInitializeRequest,
   ListToolsRequestSchema,
-  Tool,
 } from "@modelcontextprotocol/sdk/types.js"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import dotenv from "dotenv"
 import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js"
 import crypto from "node:crypto"
-import { TOKEN_EXPIRATION_TIME } from "../libs/tokens"
+import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.ts"
 import {
   updateOAuthTokensByCode,
   updateOAuthTokensByRefreshToken,
   getUserByAccessToken,
-} from "../services/db"
-import { findClientByToolName, getAllClients } from "../services/mcp-client"
+} from "../services/db.ts"
+import { findClientByToolName, getAllClients } from "../services/mcp-client.ts"
 dotenv.config()
 
 const mcpRouter = Router()
@@ -249,7 +249,7 @@ mcpRouter.post("/mcp", async (req, res) => {
             },
           }
         }
-        const toolMap = new Map<string, Tool>()
+        const toolMap = new Map<string, any>()
 
         await Promise.all(
           getAllClients().map(async ({ client }) => {

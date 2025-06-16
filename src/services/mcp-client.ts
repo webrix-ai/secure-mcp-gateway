@@ -7,7 +7,6 @@ import {
   getDefaultEnvironment,
   StdioClientTransport,
 } from "@modelcontextprotocol/sdk/client/stdio.js"
-import { Tool } from "@modelcontextprotocol/sdk/types.js"
 
 const mcpClients: Record<string, Client> = {}
 
