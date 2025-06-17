@@ -2,11 +2,11 @@ import { test, describe, after } from "node:test"
 import assert from "node:assert/strict"
 import request from "supertest"
 import app from "../src/server.ts"
-import { getAllClients } from "../src/services/mcp-client.ts"
+import { getAllMcpClients } from "../src/services/mcp-client.ts"
 
 describe("MCP Gateway", () => {
   after(async () => {
-    getAllClients().forEach(({ client }) => {
+    getAllMcpClients().forEach(({ client }) => {
       client.transport?.close()
       client.close()
     })
