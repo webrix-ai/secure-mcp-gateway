@@ -3,7 +3,7 @@ import { ExpressAuth } from "@auth/express"
 import dotenv from "dotenv"
 import { authSession } from "./libs/session.ts"
 import { getAuthProvider } from "./libs/auth.ts"
-import { findClientByName, getAllClients } from "./services/mcp-client.ts"
+import { findMcpClientByName, getAllMcpClients } from "./services/mcp-client.ts"
 import type { MCPTool } from "./types/tools.types.ts"
 import { signTokens, verifyToken } from "./libs/tokens.ts"
 import { getByAccessToken, updateUser } from "./services/db.ts"
@@ -83,7 +83,7 @@ app.get("/tools", async (_req, res) => {
   const toolMap = new Map<string, MCPTool>()
 
   await Promise.all(
-    getAllClients().map(async ({ name, client }) => {
+    getAllMcpClients().map(async ({ name, client }) => {
       const { tools } = await client.listTools()
       tools.forEach((tool) => {
         toolMap.set(`${name}:${tool.name}`, {
@@ -134,7 +134,7 @@ app.post("/call/:integrationSlug/:toolSlug", async (req, res) => {
     res.status(401).send({ error: "Unauthorized - invalid-mcp-s-token" })
   }
 
-  const mcpClient = await findClientByName(integrationSlug)
+  const mcpClient = await findMcpClientByName(integrationSlug)
 
   if (!mcpClient) {
     res.status(404).send({ error: "Client not found" })

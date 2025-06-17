@@ -11,7 +11,11 @@ import {
 import type { Tool } from "@modelcontextprotocol/sdk/types.js"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import dotenv from "dotenv"
-import { findClientByToolName, getAllClients } from "../services/mcp-client.ts"
+import {
+  findMcpClientByName,
+  findMcpClientByToolName,
+  getAllMcpClients,
+} from "../services/mcp-client.ts"
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js"
 import { mcpAuthProvider } from "../services/mcp-auth-provider.ts"
 dotenv.config()
@@ -75,13 +79,21 @@ mcpRouter.post("/mcp", async (req, res) => {
       async (request, { authInfo }) => {
         console.log("ListToolsRequestSchema called with", { request, authInfo })
         const toolMap = new Map<string, Tool>()
+        const clientName = req.query.client as string | undefined
+        const clients = clientName
+          ? [
+              {
+                name: clientName,
+                client: await findMcpClientByName(clientName),
+              },
+            ]
+          : getAllMcpClients()
 
         await Promise.all(
-          getAllClients().map(async ({ client }) => {
+          clients.map(async ({ name, client }) => {
             const { tools } = await client.listTools()
             tools.forEach((tool) => {
-              toolMap.set(tool.name, {
-                // TODO use client name
+              toolMap.set(`${name}:${tool.name}`, {
                 name: tool.name,
                 description: tool.description,
                 inputSchema: tool.inputSchema || {
@@ -102,7 +114,7 @@ mcpRouter.post("/mcp", async (req, res) => {
       async (request, { authInfo }) => {
         console.log("CallToolRequestSchema called with", { request, authInfo })
 
-        const client = findClientByToolName(request.params.name)
+        const client = findMcpClientByToolName(request.params.name)
         if (!client) {
           return {
             error: {

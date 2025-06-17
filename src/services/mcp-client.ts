@@ -21,11 +21,11 @@ export const getMcpClient = async (transport: Transport) => {
   return client
 }
 
-export const findClientByName = (name: string) => {
+export const findMcpClientByName = (name: string) => {
   return mcpClients[name]
 }
 
-export const findClientByToolName = (toolName: string) => {
+export const findMcpClientByToolName = (toolName: string) => {
   return Object.values(mcpClients).find((client) =>
     client
       .listTools()
@@ -33,7 +33,7 @@ export const findClientByToolName = (toolName: string) => {
   )
 }
 
-export const getAllClients = () => {
+export const getAllMcpClients = () => {
   return Object.entries(mcpClients).map(([name, client]) => ({
     name,
     client,
