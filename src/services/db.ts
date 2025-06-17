@@ -1,90 +1,133 @@
 import { DatabaseSync } from "node:sqlite"
 import path from "path"
+import type { Client, ClientInfo, Credentials, User } from "../types/clients.types.ts"
 
 const db = new DatabaseSync(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    email TEXT PRIMARY KEY,
-    user_access_key TEXT NOT NULL,
-    token TEXT NOT NULL,
-    token_expired_at INTEGER NOT NULL,
-    refresh_token TEXT,
-    access_token TEXT,
-    access_token_expired_at INTEGER
+  CREATE TABLE IF NOT EXISTS clients (
+    client_id TEXT PRIMARY KEY,
+    client JSON NOT NULL,
+    code TEXT,
+    code_challenge TEXT,
+    user JSON,
+    credentials JSON
   )
 `)
 
-export function upsertUser({
-  email,
-  user_access_key,
-  token,
-  token_expired_at,
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_clients_credentials_access_token 
+  ON clients (JSON_EXTRACT(credentials, '$.access_token'))
+`)
+
+interface RawClient {
+  client_id: string
+  client: string
+  code?: string
+  code_challenge?: string
+  user?: string
+  credentials?: string
+}
+
+function parseClient(client: RawClient): Client {
+  return {
+    client_id: client.client_id,
+    client: JSON.parse(client.client) as ClientInfo,
+    code: client.code,
+    code_challenge: client.code_challenge,
+    user: client.user ? (JSON.parse(client.user) as User) : undefined,
+    credentials: client.credentials
+      ? (JSON.parse(client.credentials) as Credentials)
+      : undefined,
+  }
+}
+
+export function createClient({ client }: { client: ClientInfo }) {
+  console.log("createClient called with", { client_id: client.client_id, client: client })
+  db.prepare(
+    `INSERT INTO clients (client_id, client)
+     VALUES (?, ?)`,
+  ).run(client.client_id, JSON.stringify(client))
+}
+
+export function getByClientId(client_id: string): Client | null {
+  const result = db
+    .prepare("SELECT * FROM clients WHERE client_id = ?")
+    .get(client_id) as RawClient | undefined
+  if (!result) {
+    return null
+  }
+  return parseClient(result)
+}
+
+export function getByAccessToken(access_token: string): Client | null {
+  const clientInfo = db
+    .prepare(
+      "SELECT * FROM clients WHERE JSON_EXTRACT(credentials, '$.access_token') = ?",
+    )
+    .get(access_token) as RawClient | undefined
+  if (!clientInfo) {
+    return null
+  }
+  return parseClient(clientInfo)
+}
+
+export function updateCodes({
+  client_id,
+  code,
+  code_challenge,
 }: {
-  email: string
-  user_access_key: string
-  token: string
-  token_expired_at: number
+  client_id: string
+  code: string
+  code_challenge: string
 }) {
   db.prepare(
-    `INSERT INTO users (email, user_access_key, token, token_expired_at)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT(email) DO UPDATE SET
-       user_access_key=excluded.user_access_key,
-       token=excluded.token,
-       token_expired_at=excluded.token_expired_at`,
-  ).run(email, user_access_key, token, token_expired_at)
+    `UPDATE clients SET code = ?, code_challenge = ? WHERE client_id = ?`,
+  ).run(code, code_challenge, client_id)
 }
 
-export function updateOAuthTokensByCode({
-  user_access_key,
-  token,
-  access_token,
-  access_token_expired_at,
-  refresh_token,
+export function getByCode(client_id: string, code: string): Client | null {
+  const clientInfo = db
+    .prepare("SELECT * FROM clients WHERE client_id = ? AND code = ?")
+    .get(client_id, code) as RawClient | undefined
+  if (!clientInfo) {
+    return null
+  }
+  return parseClient(clientInfo)
+}
+
+export function updateUser({
+  client_id,
+  code,
+  user,
 }: {
-  user_access_key: string
-  token: string
-  access_token: string
-  access_token_expired_at: number
-  refresh_token: string
+  client_id: string
+  code: string
+  user: User
 }) {
   db.prepare(
-    `UPDATE users SET access_token = ?, access_token_expired_at = ?, refresh_token = ? WHERE user_access_key = ? AND token = ?`,
-  ).run(
-    access_token,
-    access_token_expired_at,
-    refresh_token,
-    user_access_key,
-    token,
-  )
+    `UPDATE clients SET user = ? WHERE client_id = ? AND code = ?`,
+  ).run(JSON.stringify(user), client_id, code)
 }
-export function updateOAuthTokensByRefreshToken({
-  user_access_key,
-  access_token,
-  access_token_expired_at,
-  refresh_token,
+
+export function getByRefreshToken(refresh_token: string): Client | null {
+  const clientInfo = db
+    .prepare("SELECT * FROM clients WHERE refresh_token = ?")
+    .get(refresh_token) as RawClient | undefined
+  if (!clientInfo) {
+    return null
+  }
+  return parseClient(clientInfo)
+}
+
+export function updateCredentials({
+  client_id,
+  credentials,
 }: {
-  user_access_key: string
-  access_token: string
-  access_token_expired_at: number
-  refresh_token: string
+  client_id: string
+  credentials: Credentials
 }) {
   db.prepare(
-    `UPDATE users SET access_token = ?, access_token_expired_at = ? WHERE user_access_key = ? AND refresh_token = ?`,
-  ).run(access_token, access_token_expired_at, user_access_key, refresh_token)
-}
-
-export function getUserByEmail(email: string) {
-  return db.prepare("SELECT * FROM users WHERE email = ?").get(email)
-}
-
-export function getUserByTokens(user_access_key: string, token: string) {
-  return db
-    .prepare("SELECT * FROM users WHERE user_access_key = ? AND token = ?")
-    .get(user_access_key, token)
-}
-
-export function getUserByAccessToken(access_token: string) {
-  return db.prepare("SELECT * FROM users WHERE access_token = ?").get(access_token)
+    `UPDATE clients SET credentials = ? WHERE client_id = ?`,
+  ).run(JSON.stringify(credentials), client_id)
 }

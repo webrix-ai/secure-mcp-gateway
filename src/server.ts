@@ -5,20 +5,17 @@ import { authSession } from "./libs/session.ts"
 import { getAuthProvider } from "./libs/auth.ts"
 import { findClientByName, getAllClients } from "./services/mcp-client.ts"
 import type { MCPTool } from "./types/tools.types.ts"
-import {
-  signTokens,
-  TOKEN_EXPIRATION_TIME,
-  verifyToken,
-} from "./libs/tokens.ts"
-import { getUserByTokens, upsertUser } from "./services/db.ts"
+import { signTokens, verifyToken } from "./libs/tokens.ts"
+import { getByAccessToken, updateUser } from "./services/db.ts"
 import path from "path"
 import mcpRouter from "./routes/mcp.ts"
+import type { User } from "./types/clients.types.ts"
 dotenv.config()
 
 const app = express()
 
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }))
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" })
@@ -31,44 +28,40 @@ app.use(authSession)
 
 app.get("/authorized", (req, res) => {
   const { session } = res.locals
-  const email = session?.user?.email
-  if (!email) {
+  const user: User | undefined = session?.user
+  if (!user) {
     res.status(401).send({ error: "Unauthorized" })
   }
-  const {
-    token: tokenFromQuery,
-    clientId,
-    code,
-    callbackUrl,
-  } = req.query as {
-    token?: string
-    clientId?: string
-    code?: string
-    callbackUrl?: string
+  const { query } = req as {
+    query: {
+      token?: string
+      clientId?: string
+      code?: string
+      callbackUrl?: string
+    }
   }
-  let userAccessKey: string = ""
-  let token: string = ""
-  if (tokenFromQuery) {
-    const paredToken = verifyToken(tokenFromQuery)
-    userAccessKey = paredToken.userAccessKey!
-    token = paredToken.token!
-    if (!userAccessKey || !token) {
+  let clientId: string = ""
+  let code: string = ""
+  if (query.token) {
+    const paredToken = verifyToken(query.token)
+    clientId = paredToken.userAccessKey!
+    code = paredToken.token!
+    if (!clientId || !code) {
       res.status(401).send({ error: "Unauthorized" })
     }
-  } else if (code) {
-    userAccessKey = clientId!
-    token = code!
+  } else if (query.code) {
+    clientId = query.clientId!
+    code = query.code!
   }
 
-  upsertUser({
-    email,
-    user_access_key: userAccessKey,
-    token,
-    token_expired_at: Date.now() + TOKEN_EXPIRATION_TIME,
+  updateUser({
+    client_id: clientId,
+    code,
+    user: user as User,
   })
 
-  if (callbackUrl) {
-    res.redirect(callbackUrl)
+  if (query.callbackUrl) {
+    res.redirect(query.callbackUrl)
     return
   }
 
@@ -134,20 +127,20 @@ app.post("/generate-auth-url", async (req, res) => {
 app.post("/call/:integrationSlug/:toolSlug", async (req, res) => {
   const { integrationSlug, toolSlug } = req.params
   const auth = req.headers["authorization"]!
-  const [userAccessKey, token] = auth.split(":")
+  const [, token] = auth.split(":")
 
-  const user = getUserByTokens(userAccessKey, token)
-  if (!user || (user.token_expired_at as number) < Date.now()) {
+  const client = getByAccessToken(token)
+  if (!client || client.credentials!.access_token_expired_at < Date.now()) {
     res.status(401).send({ error: "Unauthorized - invalid-mcp-s-token" })
   }
 
-  const client = await findClientByName(integrationSlug)
+  const mcpClient = await findClientByName(integrationSlug)
 
-  if (!client) {
+  if (!mcpClient) {
     res.status(404).send({ error: "Client not found" })
   }
 
-  const toolResponse = await client.callTool({
+  const toolResponse = await mcpClient.callTool({
     name: toolSlug,
     arguments: req.body,
   })
