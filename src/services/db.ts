@@ -3,6 +3,8 @@ import path from "path"
 import type { Client, ClientInfo, Credentials, User } from "../types/clients.types.ts"
 
 const db = new DatabaseSync(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
+db.exec("PRAGMA journal_mode = WAL;");
+db.exec("PRAGMA busy_timeout = 5000;");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS clients (
@@ -112,7 +114,7 @@ export function updateUser({
 
 export function getByRefreshToken(refresh_token: string): Client | null {
   const clientInfo = db
-    .prepare("SELECT * FROM clients WHERE refresh_token = ?")
+    .prepare("SELECT * FROM clients WHERE JSON_EXTRACT(credentials, '$.refresh_token') = ?")
     .get(refresh_token) as RawClient | undefined
   if (!clientInfo) {
     return null
