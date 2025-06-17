@@ -1,6 +1,6 @@
 import app from "./server.ts"
 import fs from "node:fs"
-import { loadMcpServers } from "./services/mcp-client.ts"
+import { loadMcpServers, shutdownAllMcpServers } from "./services/mcp-client.ts"
 
 try {
   const mcpServersJsonFile = process.argv.includes("--mcpServersJsonFile")
@@ -15,6 +15,18 @@ try {
 }
 
 const port = process.env.PORT || 3000
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
 })
+
+async function gracefulShutdown() {
+  console.log("Shutting down MCP servers...")
+  await shutdownAllMcpServers()
+  server.close(() => {
+    console.log("Express server closed.")
+    process.exit(0)
+  })
+}
+
+process.on("SIGINT", gracefulShutdown)
+process.on("SIGTERM", gracefulShutdown)

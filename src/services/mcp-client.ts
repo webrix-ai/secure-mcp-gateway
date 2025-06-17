@@ -62,3 +62,12 @@ export const loadMcpServers = async (mcpServers: McpServers) => {
     mcpClients[name] = await getMcpClient(transport)
   })
 }
+
+export const shutdownAllMcpServers = async () => {
+  await Promise.all(
+    getAllMcpClients().map(async ({ client }) => {
+      client.transport?.close?.()
+      await client.close?.()
+    })
+  )
+}
