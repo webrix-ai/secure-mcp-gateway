@@ -40,17 +40,14 @@ app.get("/authorized", (req, res) => {
       callbackUrl?: string
     }
   }
-  let clientId: string = ""
-  let code: string = ""
   if (query.token) {
     const paredToken = verifyToken(query.token)
-    clientId = code = paredToken.token!
-    if (!clientId || !code) {
+    if (!paredToken.token) {
       res.status(401).send({ error: "Unauthorized" })
     }
     createUser({
       client_id: paredToken.userAccessKey!,
-      access_token: code,
+      access_token: paredToken.token!,
       user: user as User,
     })
   } else if (query.code) {

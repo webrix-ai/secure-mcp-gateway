@@ -10,7 +10,7 @@
     "start": "tsx src/index.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "test": "node --test --experimental-transform-types"
+    "test": "node --test --test-concurrency=1 --experimental-transform-types"
   },
   "repository": {
     "type": "git",

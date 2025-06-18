@@ -124,14 +124,19 @@ describe("MCP Auth Provider", () => {
   it("exchangeAuthorizationCode should update credentials and return them", async () => {
     // Insert client with code
     db.prepare(
-      `INSERT INTO clients (client_id, client, code) VALUES (?, ?, ?)`,
-    ).run(client.client_id, JSON.stringify(client), "thecode")
+      `INSERT INTO clients (client_id, client, code, user) VALUES (?, ?, ?, ?)`,
+    ).run(client.client_id, JSON.stringify(client), "thecode", JSON.stringify({
+      id: "user-1",
+      name: "User 1",
+      email: "user1@example.com",
+    }))
     const creds = await mcpAuthProvider.exchangeAuthorizationCode(
       client,
       "thecode",
       "verifier",
       "http://localhost/callback",
     )
+    console.log("creds", creds)
     assert(typeof creds.access_token === "string")
     assert(typeof creds.refresh_token === "string")
     assert.equal(creds.token_type, "Bearer")
