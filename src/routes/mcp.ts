@@ -35,9 +35,8 @@ mcpRouter.use(
 // Map to store transports by session ID
 const transports: Record<string, StreamableHTTPServerTransport> = {}
 
-mcpRouter.use(requireBearerAuth({ verifier: mcpAuthProvider }))
 // Handle POST requests for client-to-server communication
-mcpRouter.post("/mcp", async (req, res) => {
+mcpRouter.post("/mcp", requireBearerAuth({ verifier: mcpAuthProvider }), async (req, res) => {
   // Check for existing session ID
   const sessionId = req.headers["mcp-session-id"] as string | undefined
   let transport: StreamableHTTPServerTransport
@@ -165,9 +164,9 @@ const handleSessionRequest = async (req: Request, res: Response) => {
 }
 
 // Handle GET requests for server-to-client notifications via SSE
-mcpRouter.get("/mcp", handleSessionRequest)
+mcpRouter.get("/mcp", requireBearerAuth({ verifier: mcpAuthProvider }), handleSessionRequest)
 
 // Handle DELETE requests for session termination
-mcpRouter.delete("/mcp", handleSessionRequest)
+mcpRouter.delete("/mcp", requireBearerAuth({ verifier: mcpAuthProvider }), handleSessionRequest)
 
 export default mcpRouter
