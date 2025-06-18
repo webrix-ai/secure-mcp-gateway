@@ -6,7 +6,7 @@ import { getAuthProvider } from "./libs/auth.ts"
 import { findMcpClientByName, getAllMcpClients } from "./services/mcp-client.ts"
 import type { MCPTool } from "./types/tools.types.ts"
 import { signTokens, verifyToken } from "./libs/tokens.ts"
-import { getByAccessToken, updateUser } from "./services/db.ts"
+import { createUser, getByAccessToken, updateUser } from "./services/db.ts"
 import path from "path"
 import mcpRouter from "./routes/mcp.ts"
 import type { User } from "./types/clients.types.ts"
@@ -44,25 +44,26 @@ app.get("/authorized", (req, res) => {
   let code: string = ""
   if (query.token) {
     const paredToken = verifyToken(query.token)
-    clientId = paredToken.userAccessKey!
-    code = paredToken.token!
+    clientId = code = paredToken.token!
     if (!clientId || !code) {
       res.status(401).send({ error: "Unauthorized" })
     }
+    createUser({
+      client_id: paredToken.userAccessKey!,
+      access_token: code,
+      user: user as User,
+    })
   } else if (query.code) {
-    clientId = query.clientId!
-    code = query.code!
-  }
+    updateUser({
+      client_id: query.clientId!,
+      code: query.code,
+      user: user as User,
+    })
 
-  updateUser({
-    client_id: clientId,
-    code,
-    user: user as User,
-  })
-
-  if (query.callbackUrl) {
-    res.redirect(query.callbackUrl)
-    return
+    if (query.callbackUrl) {
+      res.redirect(query.callbackUrl)
+      return
+    }
   }
 
   res.sendFile(path.join(process.cwd(), "src", "pages", "authorized.html"))
@@ -117,7 +118,7 @@ app.post("/generate-auth-url", async (req, res) => {
     `${process.env.BASE_URL}/authorized?token=${tokenSignature}`,
   )
 
-  res.send({
+  res.json({
     data: {
       url: `${process.env.BASE_URL}/auth/signin?callbackUrl=${callbackUrl}`,
     },
@@ -132,12 +133,14 @@ app.post("/call/:integrationSlug/:toolSlug", async (req, res) => {
   const client = getByAccessToken(token)
   if (!client || client.credentials!.access_token_expired_at < Date.now()) {
     res.status(401).send({ error: "Unauthorized - invalid-mcp-s-token" })
+    return
   }
 
   const mcpClient = await findMcpClientByName(integrationSlug)
 
   if (!mcpClient) {
     res.status(404).send({ error: "Client not found" })
+    return
   }
 
   const toolResponse = await mcpClient.callTool({
@@ -145,7 +148,7 @@ app.post("/call/:integrationSlug/:toolSlug", async (req, res) => {
     arguments: req.body,
   })
 
-  res.send(toolResponse)
+  res.json(toolResponse)
 })
 
 export default app

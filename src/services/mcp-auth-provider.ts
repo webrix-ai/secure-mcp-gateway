@@ -107,6 +107,10 @@ export const mcpAuthProvider: OAuthServerProvider = {
       throw new Error("Unauthorized: Invalid authorization code")
     }
 
+    if (!client.user) {
+      throw new Error("Unauthorized: User not found")
+    }
+
     const refreshToken = crypto.randomBytes(32).toString("hex")
     const accessToken = crypto.randomBytes(32).toString("hex")
     const accessTokenExpiredAt = Date.now() + TOKEN_EXPIRATION_TIME

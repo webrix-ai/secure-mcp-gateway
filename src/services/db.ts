@@ -1,10 +1,16 @@
 import { DatabaseSync } from "node:sqlite"
 import path from "path"
-import type { Client, ClientInfo, Credentials, User } from "../types/clients.types.ts"
+import type {
+  Client,
+  ClientInfo,
+  Credentials,
+  User,
+} from "../types/clients.types.ts"
+import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.ts"
 
 const db = new DatabaseSync(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
-db.exec("PRAGMA journal_mode = WAL;");
-db.exec("PRAGMA busy_timeout = 5000;");
+db.exec("PRAGMA journal_mode = WAL;")
+db.exec("PRAGMA busy_timeout = 5000;")
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS clients (
@@ -45,7 +51,10 @@ function parseClient(client: RawClient): Client {
 }
 
 export function createClient({ client }: { client: ClientInfo }) {
-  console.log("createClient called with", { client_id: client.client_id, client: client })
+  console.log("createClient called with", {
+    client_id: client.client_id,
+    client: client,
+  })
   db.prepare(
     `INSERT INTO clients (client_id, client)
      VALUES (?, ?)`,
@@ -112,9 +121,38 @@ export function updateUser({
   ).run(JSON.stringify(user), client_id, code)
 }
 
+// LEGACY to support npx @mcp-s/mcp
+export function createUser({
+  client_id,
+  access_token,
+  user,
+}: {
+  client_id: string
+  access_token: string
+  user: User
+}) {
+  const credentials = {
+    access_token,
+    access_token_expired_at: Date.now() + TOKEN_EXPIRATION_TIME,
+  }
+  const clientInfo: ClientInfo = {
+    client_id,
+  }
+  db.prepare(
+    `INSERT INTO clients (client_id, client, credentials, user) VALUES (?, ?, ?, ?)`,
+  ).run(
+    client_id,
+    JSON.stringify(clientInfo),
+    JSON.stringify(credentials),
+    JSON.stringify(user),
+  )
+}
+
 export function getByRefreshToken(refresh_token: string): Client | null {
   const clientInfo = db
-    .prepare("SELECT * FROM clients WHERE JSON_EXTRACT(credentials, '$.refresh_token') = ?")
+    .prepare(
+      "SELECT * FROM clients WHERE JSON_EXTRACT(credentials, '$.refresh_token') = ?",
+    )
     .get(refresh_token) as RawClient | undefined
   if (!clientInfo) {
     return null
@@ -129,7 +167,8 @@ export function updateCredentials({
   client_id: string
   credentials: Credentials
 }) {
-  db.prepare(
-    `UPDATE clients SET credentials = ? WHERE client_id = ?`,
-  ).run(JSON.stringify(credentials), client_id)
+  db.prepare(`UPDATE clients SET credentials = ? WHERE client_id = ?`).run(
+    JSON.stringify(credentials),
+    client_id,
+  )
 }

@@ -3,7 +3,7 @@ import type { DefaultUser } from "@auth/core/types"
 export interface ClientInfo {
   client_id: string
   client_name?: string
-  redirect_uris: string[]
+  redirect_uris?: string[]
   token_endpoint_auth_method?: string
   grant_types?: string[]
   response_types?: string[]
