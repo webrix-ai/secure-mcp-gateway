@@ -26,12 +26,12 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 - **TypeScript Support**: Fully typed for robust development
 - **Open Source**: MIT licensed and community-driven
 
-<video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video> TODO: ADD OUR VIDEO
+<!-- <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video> TODO: ADD OUR VIDEO -->
 
 **Supports all MCP Connection Types:**
 - **STDIO**: Standard input/output MCP servers
 - **SSE**: Server-Sent Events for real-time communication
-- **StreamableHTTP**: HTTP-based streaming connections
+- **StreamableHTTP**: HTTP-based streaming connections via `http://localhost:3000/mcp` (or `https://<your-domain>/mcp` for hosted deployments)
 
 ### How To Use
 
@@ -58,6 +58,8 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 3. **Add to your MCP configuration**:
    
    **For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
+   
+   **STDIO Configuration:**
    ```json
    {
      "mcpServers": {
@@ -71,6 +73,19 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
      }
    }
    ```
+
+   **StreamableHTTP Configuration:**
+   ```json
+   {
+     "mcpServers": {
+       "mcp-gateway": {
+         "url": "http://localhost:3000/mcp"
+       }
+     }
+   }
+   ```
+
+   > **Server Selection**: You can connect to a specific MCP server by adding the `?server_name=XXX` query parameter, where `XXX` is the name of the server from your `mcp.json` configuration. For example: `http://localhost:3000/mcp?server_name=your-server`
 
    **Connect with your preferred AI client:**
 
@@ -164,6 +179,42 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 | `AUTH_[Provider]_ID` | OAuth client ID for your provider | - | Yes |
 | `AUTH_[Provider]_SECRET` | OAuth client secret for your provider | - | Yes |
 | `AUTH_[Provider]_*` | Additional provider-specific variables (see [Auth.js documentation](https://authjs.dev/reference/core/providers/)) | - | Varies |
+
+### Troubleshooting
+
+<details>
+<summary>StreamableHTTP with Cursor: Tools not appearing after login</summary>
+
+**Issue**: When using StreamableHTTP configuration in Cursor, tools don't appear even after successful authentication.
+
+**Solution**: Make sure you have only **one Cursor window open**. Multiple Cursor windows can interfere with the MCP connection establishment.
+
+1. Close all Cursor windows
+2. Open a single Cursor window
+3. Retry the authentication process
+
+</details>
+
+<details>
+<summary>Node.js SQLite module error</summary>
+
+**Issue**: You see the following error:
+```
+Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite
+```
+
+**Solution**: This error occurs when using an older version of Node.js. The `node:sqlite` module requires **Node.js version 22 or higher**.
+
+**Fix**:
+1. Update Node.js to version 22 or later
+2. Verify your version: `node --version`
+3. Restart the gateway: `npm run start`
+
+**Installation options**:
+- Using [nvm](https://github.com/nvm-sh/nvm): `nvm install 22 && nvm use 22`
+- Download from [nodejs.org](https://nodejs.org/)
+
+</details>
 
 ### Hosted Solution
 

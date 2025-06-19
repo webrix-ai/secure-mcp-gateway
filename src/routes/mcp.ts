@@ -78,7 +78,7 @@ mcpRouter.post("/mcp", requireBearerAuth({ verifier: mcpAuthProvider }), async (
       async (request, { authInfo }) => {
         console.log("ListToolsRequestSchema called with", { request, authInfo })
         const toolMap = new Map<string, Tool>()
-        const clientName = req.query.client as string | undefined
+        const clientName = req.query.server_name as string | undefined
         const clients = clientName
           ? [
               {
