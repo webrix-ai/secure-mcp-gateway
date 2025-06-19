@@ -1,5 +1,5 @@
 {
-  "name": "@mcp-s/mcp-gateway",
+  "name": "@mcp-s/secure-mcp-gateway",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,13 +14,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/webrix-ai/mcp-gateway.git"
+    "url": "git+https://github.com/webrix-ai/secure-mcp-gateway.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/webrix-ai/mcp-gateway/issues"
+    "url": "https://github.com/webrix-ai/secure-mcp-gateway/issues"
   },
   "homepage": "https://www.mcp-s.com/",
   "dependencies": {
