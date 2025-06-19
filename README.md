@@ -199,7 +199,7 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 <summary>Node.js SQLite module error</summary>
 
 **Issue**: You see the following error:
-```
+```text
 Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite
 ```
 
