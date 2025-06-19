@@ -8,9 +8,10 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "tsx src/index.ts",
+    "test": "node --test --test-concurrency=1 --experimental-transform-types",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "test": "node --test --test-concurrency=1 --experimental-transform-types"
+    "prepublishOnly": "npm run build && npm version patch"
   },
   "repository": {
     "type": "git",
