@@ -30,12 +30,14 @@
   "dependencies": {
     "@auth/express": "^0.10.1",
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "better-sqlite3": "^11.10.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
     "@eslint/markdown": "^6.5.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
     "@types/supertest": "^6.0.3",

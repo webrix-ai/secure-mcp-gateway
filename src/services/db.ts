@@ -1,4 +1,4 @@
-import { DatabaseSync } from "node:sqlite"
+import Database from "better-sqlite3"
 import path from "path"
 import type {
   Client,
@@ -8,9 +8,7 @@ import type {
 } from "../types/clients.types.ts"
 import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.ts"
 
-const db = new DatabaseSync(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
-db.exec("PRAGMA journal_mode = WAL;")
-db.exec("PRAGMA busy_timeout = 5000;")
+const db = new Database(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS clients (
