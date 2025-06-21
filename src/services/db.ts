@@ -49,14 +49,10 @@ function parseClient(client: RawClient): Client {
 }
 
 export function createClient({ client }: { client: ClientInfo }) {
-  console.log("createClient called with", {
-    client_id: client.client_id,
-    client: client,
-  })
   db.prepare(
     `INSERT INTO clients (client_id, client)
      VALUES (?, ?)`,
-  ).run(client.client_id, JSON.stringify(client))
+  ).run(client.client_id || crypto.randomUUID(), JSON.stringify(client))
 }
 
 export function getByClientId(client_id: string): Client | null {
