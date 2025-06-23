@@ -10,7 +10,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js"
 import type { Tool } from "@modelcontextprotocol/sdk/types.js"
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
-import dotenv from "dotenv"
 import {
   findMcpClientByName,
   findMcpClientByToolName,
@@ -18,7 +17,7 @@ import {
 } from "../services/mcp-client.js"
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js"
 import { mcpAuthProvider } from "../services/mcp-auth-provider.js"
-dotenv.config()
+import { envVars } from "../libs/config.js"
 
 const mcpRouter = Router()
 mcpRouter.use(express.json())
@@ -27,8 +26,8 @@ mcpRouter.use(express.urlencoded())
 mcpRouter.use(
   mcpAuthRouter({
     provider: mcpAuthProvider,
-    issuerUrl: new URL(process.env.BASE_URL || "http://localhost:3000"),
-    baseUrl: new URL(process.env.BASE_URL || "http://localhost:3000"),
+    issuerUrl: new URL(envVars.BASE_URL),
+    baseUrl: new URL(envVars.BASE_URL),
   }),
 )
 

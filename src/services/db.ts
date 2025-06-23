@@ -6,9 +6,9 @@ import type {
   Credentials,
   User,
 } from "../types/clients.types.ts"
-import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.js"
+import { envVars } from "../libs/config.js"
 
-const db = new Database(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
+const db = new Database(path.resolve(envVars.DB_PATH))
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS clients (
@@ -127,7 +127,7 @@ export function createUser({
 }) {
   const credentials = {
     access_token,
-    access_token_expired_at: Date.now() + TOKEN_EXPIRATION_TIME,
+    access_token_expired_at: Date.now() + envVars.TOKEN_EXPIRATION_TIME,
   }
   const clientInfo: ClientInfo = {
     client_id,

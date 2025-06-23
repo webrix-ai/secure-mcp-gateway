@@ -1,6 +1,4 @@
-import dotenv from "dotenv"
-dotenv.config()
-
+import { envVars } from "./libs/config.js"
 import express from "express"
 import { ExpressAuth } from "@auth/express"
 import { authSession } from "./libs/session.js"
@@ -113,12 +111,12 @@ app.post("/generate-auth-url", async (req, res) => {
   })
 
   const callbackUrl = encodeURIComponent(
-    `${process.env.BASE_URL}/authorized?token=${tokenSignature}`,
+    `${envVars.BASE_URL}/authorized?token=${tokenSignature}`,
   )
 
   res.json({
     data: {
-      url: `${process.env.BASE_URL}/auth/signin?callbackUrl=${callbackUrl}`,
+      url: `${envVars.BASE_URL}/auth/signin?callbackUrl=${callbackUrl}`,
     },
   })
 })

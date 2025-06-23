@@ -1,9 +1,7 @@
-export const getAuthProviderName = () => {
-  return process.env.AUTH_PROVIDER?.toLowerCase() || "google"
-}
+import { envVars } from "./config.js"
 
 export const getAuthProvider = async () => {
-  const provider = getAuthProviderName()
+  const provider = envVars.AUTH_PROVIDER
   try {
     const module = await import(`@auth/express/providers/${provider}`)
     return module.default

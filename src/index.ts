@@ -1,3 +1,5 @@
+import { envVars } from "./libs/config.js"
+
 import app from "./server.js"
 import fs from "node:fs"
 import { loadMcpServers, shutdownAllMcpServers } from "./services/mcp-client.js"
@@ -14,7 +16,7 @@ try {
   console.error("No valid MCP servers found", error)
 }
 
-const port = process.env.PORT || 3000
+const port = envVars.PORT
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
 })

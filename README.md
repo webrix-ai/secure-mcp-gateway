@@ -29,18 +29,29 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 <!-- <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video> TODO: ADD OUR VIDEO -->
 
 **Supports all MCP Connection Types:**
+
 - **STDIO**: Standard input/output MCP servers
 - **SSE**: Server-Sent Events for real-time communication
 - **StreamableHTTP**: HTTP-based streaming connections via `http://localhost:3000/mcp` (or `https://<your-domain>/mcp` for hosted deployments)
 
 ### How To Use
 
-1. **Start the gateway**:
-   ```bash
-   npm install && npm run start
-   ```
+**Quick Start with npx (Recommended):**
+
+```bash
+npx @mcp-s/secure-mcp-gateway
+```
+
+**Alternative - Local Development:**
+
+```bash
+git clone https://github.com/mcp-s-ai/secure-mcp-gateway.git
+cd secure-mcp-gateway
+npm install && npm run start
+```
 
 2. **Configure your MCP servers** - Create `mcp.json` file in your project:
+
    ```json
    {
      "mcpServers": {
@@ -56,10 +67,11 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
    ```
 
 3. **Add to your MCP configuration**:
-   
+
    **For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
-   
+
    **STDIO Configuration:**
+
    ```json
    {
      "mcpServers": {
@@ -75,6 +87,7 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
    ```
 
    **StreamableHTTP Configuration:**
+
    ```json
    {
      "mcpServers": {
@@ -89,26 +102,27 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 
    **Connect with your preferred AI client:**
 
-   | Client | Link |
-   |--------|------|
-   | <img src="https://claude.ai/favicon.ico" alt="Claude" width="14" height="14"> **Claude** | [claude.ai](https://claude.ai) |
-   | <img src="https://www.cursor.com/favicon.ico" alt="Cursor"  width="14" height="14"> **Cursor** | [cursor.com](https://cursor.com) |
-   | <img src="https://codeium.com/favicon.ico" alt="Windsurf"  width="14" height="14"> **Windsurf** | [codeium.com/windsurf](https://codeium.com/windsurf) |
-   | <img src="https://code.visualstudio.com/assets/favicon.ico" alt="VSCode" width="14" height="14"> **VSCode** | [code.visualstudio.com](https://code.visualstudio.com/) |
-   | <img src="https://cline.bot/assets/icons/favicon-256x256.png" alt="Cline"  width="14" height="14"> **Cline** | [cline.tools](https://cline.tools) |
-   | <img src="https://highlightai.com/favicon.ico" alt="Highlight AI"  width="14" height="14"> **Highlight AI** | [highlightai.com](https://highlightai.com) |
-   | <img src="https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png" alt="Augment Code" width="14" height="14"> **Augment Code** | [augmentcode.com](https://augmentcode.com) |
+   | Client                                                                                                                                                                  | Link                                                    |
+   | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+   | <img src="https://claude.ai/favicon.ico" alt="Claude" width="14" height="14"> **Claude**                                                                                | [claude.ai](https://claude.ai)                          |
+   | <img src="https://www.cursor.com/favicon.ico" alt="Cursor"  width="14" height="14"> **Cursor**                                                                          | [cursor.com](https://cursor.com)                        |
+   | <img src="https://codeium.com/favicon.ico" alt="Windsurf"  width="14" height="14"> **Windsurf**                                                                         | [codeium.com/windsurf](https://codeium.com/windsurf)    |
+   | <img src="https://code.visualstudio.com/assets/favicon.ico" alt="VSCode" width="14" height="14"> **VSCode**                                                             | [code.visualstudio.com](https://code.visualstudio.com/) |
+   | <img src="https://cline.bot/assets/icons/favicon-256x256.png" alt="Cline"  width="14" height="14"> **Cline**                                                            | [cline.tools](https://cline.tools)                      |
+   | <img src="https://highlightai.com/favicon.ico" alt="Highlight AI"  width="14" height="14"> **Highlight AI**                                                             | [highlightai.com](https://highlightai.com)              |
+   | <img src="https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png" alt="Augment Code" width="14" height="14"> **Augment Code** | [augmentcode.com](https://augmentcode.com)              |
 
 ### Deploy
 
-Deploy the mcp-s gateway using the same simple steps as local setup:
+Deploy the mcp-s gateway using npx:
 
 1. Set up your environment variables (see [Advanced Configuration](#advanced-configuration))
 2. Create your `mcp.json` configuration file
-3. Run `npm run start`
+3. Run `npx @mcp-s/secure-mcp-gateway`
 
 For production deployments, consider using:
-- Process managers like PM2
+
+- Process managers like PM2: `pm2 start "npx @mcp-s/secure-mcp-gateway" --name mcp-gateway`
 - Container orchestration (Docker, Kubernetes)
 - Cloud platforms (Heroku, Railway, Render)
 
@@ -168,17 +182,17 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 
 ### Advanced Configuration
 
-| Environment Variable | Description | Default Value | Required |
-|---------------------|-------------|---------------|----------|
-| `PORT` | Server port | `3000` | No |
-| `BASE_URL` | Base URL for the gateway | `http://localhost:3000` | No |
-| `AUTH_SECRET` | Secret for signing/encrypting tokens (generate with `openssl rand -base64 33`) | - | Yes |
-| `AUTH_PROVIDER` | OAuth provider name | `google` | No |
-| `TOKEN_EXPIRATION_TIME` | Token expiration time in milliseconds | `86400000` (24h) | No |
-| `DB_PATH` | SQLite database file path | `./mcp.sqlite` | No |
-| `AUTH_[Provider]_ID` | OAuth client ID for your provider | - | Yes |
-| `AUTH_[Provider]_SECRET` | OAuth client secret for your provider | - | Yes |
-| `AUTH_[Provider]_*` | Additional provider-specific variables (see [Auth.js documentation](https://authjs.dev/reference/core/providers/)) | - | Varies |
+| Environment Variable     | Description                                                                                                        | Default Value           | Required |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------- | -------- |
+| `PORT`                   | Server port                                                                                                        | `3000`                  | No       |
+| `BASE_URL`               | Base URL for the gateway                                                                                           | `http://localhost:3000` | No       |
+| `AUTH_SECRET`            | Secret for signing/encrypting tokens (generate with `openssl rand -base64 33`)                                     | -                       | Yes      |
+| `AUTH_PROVIDER`          | OAuth provider name                                                                                                | `google`                | No       |
+| `TOKEN_EXPIRATION_TIME`  | Token expiration time in milliseconds                                                                              | `86400000` (24h)        | No       |
+| `DB_PATH`                | SQLite database file path                                                                                          | `./mcp.sqlite`          | No       |
+| `AUTH_[Provider]_ID`     | OAuth client ID for your provider                                                                                  | -                       | Yes      |
+| `AUTH_[Provider]_SECRET` | OAuth client secret for your provider                                                                              | -                       | Yes      |
+| `AUTH_[Provider]_*`      | Additional provider-specific variables (see [Auth.js documentation](https://authjs.dev/reference/core/providers/)) | -                       | Varies   |
 
 ### Troubleshooting
 
@@ -199,6 +213,7 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 <summary>Node.js SQLite module error</summary>
 
 **Issue**: You see the following error:
+
 ```text
 Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite
 ```
@@ -206,11 +221,13 @@ Error [ERR_UNKNOWN_BUILTIN_MODULE]: No such built-in module: node:sqlite
 **Solution**: This error occurs when using an older version of Node.js. The `node:sqlite` module requires **Node.js version 22 or higher**.
 
 **Fix**:
+
 1. Update Node.js to version 22 or later
 2. Verify your version: `node --version`
 3. Restart the gateway: `npm run start`
 
 **Installation options**:
+
 - Using [nvm](https://github.com/nvm-sh/nvm): `nvm install 22 && nvm use 22`
 - Download from [nodejs.org](https://nodejs.org/)
 
@@ -236,7 +253,6 @@ Have questions? Need help getting started? Want to share your MCP setup?
 Join our Discord community where developers are actively helping each other with MCP gatway implementations, troubleshooting, and sharing best practices.
 
 **[Join our Discord →](https://discord.gg/ZhehX4Ku)**
-
 
 ### License
 
