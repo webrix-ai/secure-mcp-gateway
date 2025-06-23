@@ -68,7 +68,7 @@ jobs:
           git tag "v$NEW_VERSION"
 
           # Push changes and tags
-          git push origin main
+          git push origin HEAD
           git push origin "v$NEW_VERSION"
 
       - name: Publish to NPM
@@ -90,5 +90,5 @@ jobs:
           body: |
             ## Changes in v${{ steps.version.outputs.new_version }}
 
-            - Automated release from main branch
+            - Automated release from ${{ github.ref_name }} branch
             - Install with: `npx @mcp-s/secure-mcp-gateway`
