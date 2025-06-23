@@ -1,7 +1,7 @@
 import type { Response } from "express"
 import type { OAuthServerProvider } from "@modelcontextprotocol/sdk/server/auth/provider.js"
 import crypto from "node:crypto"
-import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.ts"
+import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.js"
 import {
   createClient,
   getByAccessToken,
@@ -10,7 +10,7 @@ import {
   getByClientId,
   getByRefreshToken,
   updateCredentials,
-} from "../services/db.ts"
+} from "../services/db.js"
 import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js"
 
 export const mcpAuthProvider: OAuthServerProvider = {

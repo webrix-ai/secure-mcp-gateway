@@ -1,6 +1,6 @@
-import app from "./server.ts"
+import app from "./server.js"
 import fs from "node:fs"
-import { loadMcpServers, shutdownAllMcpServers } from "./services/mcp-client.ts"
+import { loadMcpServers, shutdownAllMcpServers } from "./services/mcp-client.js"
 
 try {
   const mcpServersJsonFile = process.argv.includes("--mcpServersJsonFile")

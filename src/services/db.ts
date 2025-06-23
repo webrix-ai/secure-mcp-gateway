@@ -6,7 +6,7 @@ import type {
   Credentials,
   User,
 } from "../types/clients.types.ts"
-import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.ts"
+import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.js"
 
 const db = new Database(path.resolve(process.env.DB_PATH || "./mcp.sqlite"))
 

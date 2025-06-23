@@ -40,3 +40,5 @@ next-env.d.ts
 # mcp
 mcp.json
 mcp.sqlite*
+
+.cursor/

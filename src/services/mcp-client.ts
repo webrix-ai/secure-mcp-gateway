@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js"
-import type { McpServers } from "../types/mcp-servers.types.ts"
+import type { McpServers } from "../types/mcp-servers.types.js"
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js"
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js"
 import {
@@ -68,6 +68,6 @@ export const shutdownAllMcpServers = async () => {
     getAllMcpClients().map(async ({ client }) => {
       client.transport?.close?.()
       await client.close?.()
-    })
+    }),
   )
 }

@@ -3,15 +3,15 @@ dotenv.config()
 
 import express from "express"
 import { ExpressAuth } from "@auth/express"
-import { authSession } from "./libs/session.ts"
-import { getAuthProvider } from "./libs/auth.ts"
-import { findMcpClientByName, getAllMcpClients } from "./services/mcp-client.ts"
-import type { MCPTool } from "./types/tools.types.ts"
-import { signTokens, verifyToken } from "./libs/tokens.ts"
-import { createUser, getByAccessToken, updateUser } from "./services/db.ts"
+import { authSession } from "./libs/session.js"
+import { getAuthProvider } from "./libs/auth.js"
+import { findMcpClientByName, getAllMcpClients } from "./services/mcp-client.js"
+import type { MCPTool } from "./types/tools.types.js"
+import { signTokens, verifyToken } from "./libs/tokens.js"
+import { createUser, getByAccessToken, updateUser } from "./services/db.js"
 import path from "path"
-import mcpRouter from "./routes/mcp.ts"
-import type { User } from "./types/clients.types.ts"
+import mcpRouter from "./routes/mcp.js"
+import type { User } from "./types/clients.types.js"
 
 const app = express()
 
