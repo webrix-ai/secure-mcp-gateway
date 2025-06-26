@@ -1,9 +1,18 @@
 {
   "name": "@mcp-s/secure-mcp-gateway",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "A secure, open-source OAuth gateway for MCP authentication",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "bin": {
+    "@mcp-s/secure-mcp-gateway": "bin/mcp-gateway.js"
+  },
   "type": "module",
+  "files": [
+    "dist/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -11,10 +20,11 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "tsx src/index.ts",
-    "test": "node --test --test-concurrency=1 --experimental-transform-types",
+    "test": "node --test --test-concurrency=1",
+    "test:local": "./scripts/test-local.sh",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
-    "prepublishOnly": "npm run build && npm version patch"
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",

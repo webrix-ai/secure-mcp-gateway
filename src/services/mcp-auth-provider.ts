@@ -1,7 +1,7 @@
 import type { Response } from "express"
 import type { OAuthServerProvider } from "@modelcontextprotocol/sdk/server/auth/provider.js"
 import crypto from "node:crypto"
-import { TOKEN_EXPIRATION_TIME } from "../libs/tokens.ts"
+import { envVars } from "../libs/config.js"
 import {
   createClient,
   getByAccessToken,
@@ -10,7 +10,7 @@ import {
   getByClientId,
   getByRefreshToken,
   updateCredentials,
-} from "../services/db.ts"
+} from "../services/db.js"
 import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js"
 
 export const mcpAuthProvider: OAuthServerProvider = {
@@ -68,11 +68,11 @@ export const mcpAuthProvider: OAuthServerProvider = {
     if (params.state) {
       redirectUrl.searchParams.set("state", params.state)
     }
-    const callbackUrl = `${process.env.BASE_URL}/authorized?code=${code}&clientId=${client.client_id}&callbackUrl=${encodeURIComponent(
+    const callbackUrl = `${envVars.BASE_URL}/authorized?code=${code}&clientId=${client.client_id}&callbackUrl=${encodeURIComponent(
       redirectUrl.toString(),
     )}`
     res.redirect(
-      `${process.env.BASE_URL}/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`,
+      `${envVars.BASE_URL}/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`,
     )
   },
   challengeForAuthorizationCode: async (
@@ -113,7 +113,7 @@ export const mcpAuthProvider: OAuthServerProvider = {
 
     const refreshToken = crypto.randomBytes(32).toString("hex")
     const accessToken = crypto.randomBytes(32).toString("hex")
-    const accessTokenExpiredAt = Date.now() + TOKEN_EXPIRATION_TIME
+    const accessTokenExpiredAt = Date.now() + envVars.TOKEN_EXPIRATION_TIME
 
     const credentials = {
       access_token: accessToken,
@@ -146,7 +146,7 @@ export const mcpAuthProvider: OAuthServerProvider = {
       throw new Error("Unauthorized: Invalid refresh token")
     }
     const accessToken = crypto.randomBytes(32).toString("hex")
-    const accessTokenExpiredAt = Date.now() + TOKEN_EXPIRATION_TIME
+    const accessTokenExpiredAt = Date.now() + envVars.TOKEN_EXPIRATION_TIME
     updateCredentials({
       client_id: client.client_id,
       credentials: {
@@ -158,7 +158,7 @@ export const mcpAuthProvider: OAuthServerProvider = {
     return {
       access_token: accessToken,
       token_type: "Bearer",
-      expires_in: TOKEN_EXPIRATION_TIME,
+      expires_in: envVars.TOKEN_EXPIRATION_TIME,
       scope: scopes?.join(" ") || "openid email profile",
       refresh_token: refreshToken,
     }

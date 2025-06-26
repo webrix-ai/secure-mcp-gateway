@@ -1,20 +1,46 @@
-import app from "./server.ts"
+import {
+  envVars,
+  loadConfig,
+  reloadEnvVars,
+  validateConfig,
+} from "./libs/config.js"
+
+import app from "./server.js"
 import fs from "node:fs"
-import { loadMcpServers, shutdownAllMcpServers } from "./services/mcp-client.ts"
+import { loadMcpServers, shutdownAllMcpServers } from "./services/mcp-client.js"
 
-try {
-  const mcpServersJsonFile = process.argv.includes("--mcpServersJsonFile")
-    ? process.argv[process.argv.indexOf("--mcpServersJsonFile") + 1]
-    : "./mcp.json"
+// Parse command line arguments
+const args = process.argv.slice(2)
+let mcpConfigPath = "./mcp.json"
+let envFilePath: string | undefined
 
-  const mcpServers = await fs.promises.readFile(mcpServersJsonFile, "utf-8")
-
-  await loadMcpServers(JSON.parse(mcpServers))
-} catch (error) {
-  console.error("No valid MCP servers found", error)
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === "--mcp-config" && i + 1 < args.length) {
+    mcpConfigPath = args[i + 1]
+    i++ // Skip the next argument as it's the value
+  } else if (args[i] === "--env-file" && i + 1 < args.length) {
+    envFilePath = args[i + 1]
+    i++ // Skip the next argument as it's the value
+  }
 }
 
-const port = process.env.PORT || 3000
+// Load custom env file if provided and reload environment variables
+if (envFilePath) {
+  loadConfig(envFilePath)
+  reloadEnvVars()
+}
+
+// Validate configuration after all loading is complete
+validateConfig()
+
+try {
+  const mcpServers = await fs.promises.readFile(mcpConfigPath, "utf-8")
+  await loadMcpServers(JSON.parse(mcpServers))
+} catch (error) {
+  console.error(`Failed to load MCP servers from ${mcpConfigPath}:`, error)
+}
+
+const port = envVars.PORT
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
 })
