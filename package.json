@@ -1,6 +1,6 @@
 {
   "name": "@mcp-s/secure-mcp-gateway",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A secure, open-source OAuth gateway for MCP authentication",
   "main": "dist/index.js",
   "bin": {
