@@ -37,16 +37,7 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 }
 ```
 
-**2. Add your `.env` file using this example:**
-
-```.env
-AUTH_SECRET=E/MAdDq0B1aX+MGNyVlEUk0WzRpCdimlCrUOKST1CxKH # Generate with command: openssl rand -base64 33
-AUTH_PROVIDER=google
-AUTH_GOOGLE_ID=...apps.googleusercontent.com
-AUTH_GOOGLE_SECRET=GOCSPX-...
-```
-
-See [Advanced Configuration](#advanced-configuration) for more.
+**2. Use the `.env.example` file as a base, and override as needed:**
 
 **3. Start with npx (Recommended):**
 
@@ -61,16 +52,13 @@ npx @mcp-s/secure-mcp-gateway --mcp-config ./custom/mcp.json --envfile ./custom/
 Or clone:
 
 ```bash
-git clone https://github.com/mcp-s-ai/secure-mcp-gateway.git
-cd secure-mcp-gateway
+git clone https://github.com/mcp-s-ai/secure-mcp-gateway.git && cd secure-mcp-gateway
 npm install && npm run start
 ```
 
 **4. Add to your MCP configuration**:
 
-**For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
-
-**STDIO Configuration:**
+stdio:
 
 ```json
 {
@@ -86,7 +74,7 @@ npm install && npm run start
 }
 ```
 
-**StreamableHTTP Configuration:**
+Streamable HTTP Configuration:
 
 ```json
 {
@@ -272,9 +260,9 @@ Visit **[mcp-s.com](https://www.mcp-s.com?utm_source=github&utm_medium=readme&ut
 
 Have questions? Need help getting started? Want to share your MCP setup?
 
-Join our Discord community where developers are actively helping each other with MCP gatway implementations, troubleshooting, and sharing best practices.
+Join our Slack community where developers are actively helping each other with MCP gatway implementations, troubleshooting, and sharing best practices.
 
-**[Join our Discord →](https://discord.gg/ZhehX4Ku)**
+**💬 [Join our Slack community →](https://join.slack.com/t/mcp-s/shared_invite/zt-388bm69k5-dACbMA5AwLKhNkdg4GwzLQ)**
 
 ### License
 
