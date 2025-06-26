@@ -4,7 +4,7 @@
   "description": "A secure, open-source OAuth gateway for MCP authentication",
   "main": "dist/index.js",
   "bin": {
-    "mcp-gateway": "bin/mcp-gateway.js"
+    "@mcp-s/secure-mcp-gateway": "bin/mcp-gateway.js"
   },
   "type": "module",
   "files": [
