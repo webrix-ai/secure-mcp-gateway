@@ -18,7 +18,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === "--mcp-config" && i + 1 < args.length) {
     mcpConfigPath = args[i + 1]
     i++ // Skip the next argument as it's the value
-  } else if (args[i] === "--env-file" && i + 1 < args.length) {
+  } else if (args[i] === "--envfile" && i + 1 < args.length) {
     envFilePath = args[i + 1]
     i++ // Skip the next argument as it's the value
   }

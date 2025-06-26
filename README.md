@@ -55,7 +55,7 @@ See [Advanced Configuration](#advanced-configuration) for more.
 npx @mcp-s/secure-mcp-gateway
 
 # Custom configuration paths
-npx @mcp-s/secure-mcp-gateway --mcp-config ./custom/mcp.json --env-file ./custom/.env
+npx @mcp-s/secure-mcp-gateway --mcp-config ./custom/mcp.json --envfile ./custom/.env
 ```
 
 Or clone:
@@ -200,7 +200,7 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 | Option         | Description                            | Default Value | Example                              |
 | -------------- | -------------------------------------- | ------------- | ------------------------------------ |
 | `--mcp-config` | Path to MCP servers configuration file | `./mcp.json`  | `--mcp-config ./config/servers.json` |
-| `--env-file`   | Path to environment variables file     | `./.env`      | `--env-file ./config/production.env` |
+| `--envfile`    | Path to environment variables file     | `./.env`      | `--envfile ./config/production.env`  |
 
 #### Environment Variables
 
