@@ -2,7 +2,7 @@ name: Publish
 
 on:
   push:
-    branches: [main]
+    branches: [main, npm-publish-branch]
   workflow_dispatch:
 
 permissions:

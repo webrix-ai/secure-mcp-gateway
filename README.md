@@ -19,30 +19,46 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 
 **mcp-gateway** is a secure gateway and integration layer for the **Model Context Protocol (MCP)**. It provides a unified, enterprise-ready interface for connecting, managing, and extending MCP modules and services, with a focus on security and seamless integration.
 
-### Features
+### Quick Start
 
-- **Self-Hosted Gateway**: Deploy within your own infrastructure for maximum control
-- **OAuth Authentication**: Secure authentication with any OAuth provider via [Auth.js](https://authjs.dev)
-- **TypeScript Support**: Fully typed for robust development
-- **Open Source**: MIT licensed and community-driven
+**1. Configure your MCP servers** - Create `mcp.json` file in your project:
 
-<!-- <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video> TODO: ADD OUR VIDEO -->
-
-**Supports all MCP Connection Types:**
-
-- **STDIO**: Standard input/output MCP servers
-- **SSE**: Server-Sent Events for real-time communication
-- **StreamableHTTP**: HTTP-based streaming connections via `http://localhost:3000/mcp` (or `https://<your-domain>/mcp` for hosted deployments)
-
-### How To Use
-
-**Quick Start with npx (Recommended):**
-
-```bash
-npx @mcp-s/secure-mcp-gateway
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "command": "npx",
+      "args": ["-y", "@your-mcp-server"],
+      "env": {
+        "API_KEY": "your-api-key"
+      }
+    }
+  }
+}
 ```
 
-**Alternative - Local Development:**
+**2. Add your `.env` file using this example:**
+
+```.env
+AUTH_SECRET=E/MAdDq0B1aX+MGNyVlEUk0WzRpCdimlCrUOKST1CxKH # Generate with command: openssl rand -base64 33
+AUTH_PROVIDER=google
+AUTH_GOOGLE_ID=...apps.googleusercontent.com
+AUTH_GOOGLE_SECRET=GOCSPX-...
+```
+
+See [Advanced Configuration](#advanced-configuration) for more.
+
+**3. Start with npx (Recommended):**
+
+```bash
+# Default (uses ./mcp.json and ./.env)
+npx @mcp-s/secure-mcp-gateway
+
+# Custom configuration paths
+npx @mcp-s/secure-mcp-gateway --mcp-config ./custom/mcp.json --env-file ./custom/.env
+```
+
+Or clone:
 
 ```bash
 git clone https://github.com/mcp-s-ai/secure-mcp-gateway.git
@@ -50,67 +66,64 @@ cd secure-mcp-gateway
 npm install && npm run start
 ```
 
-2. **Configure your MCP servers** - Create `mcp.json` file in your project:
+**4. Add to your MCP configuration**:
 
-   ```json
-   {
-     "mcpServers": {
-       "your-server": {
-         "command": "npx",
-         "args": ["-y", "@your-mcp-server"],
-         "env": {
-           "API_KEY": "your-api-key"
-         }
-       }
-     }
-   }
-   ```
+**For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
 
-3. **Add to your MCP configuration**:
+**STDIO Configuration:**
 
-   **For Cursor/Claude Desktop/VS Code** - Add this to your MCP settings:
+```json
+{
+  "mcpServers": {
+    "mcp-gateway": {
+      "command": "npx",
+      "args": ["-y", "@mcp-s/mcp"],
+      "env": {
+        "BASE_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
+```
 
-   **STDIO Configuration:**
+**StreamableHTTP Configuration:**
 
-   ```json
-   {
-     "mcpServers": {
-       "mcp-gateway": {
-         "command": "npx",
-         "args": ["-y", "@mcp-s/mcp"],
-         "env": {
-           "BASE_URL": "http://localhost:3000"
-         }
-       }
-     }
-   }
-   ```
+```json
+{
+  "mcpServers": {
+    "mcp-gateway": {
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
+```
 
-   **StreamableHTTP Configuration:**
+### Features
 
-   ```json
-   {
-     "mcpServers": {
-       "mcp-gateway": {
-         "url": "http://localhost:3000/mcp"
-       }
-     }
-   }
-   ```
+- **Self-Hosted Gateway**: Deploy within your own infrastructure for maximum control
+- **OAuth Authentication**: Secure authentication with any OAuth provider via [Auth.js](https://authjs.dev)
+- **TypeScript Support**: Fully typed for robust development
 
-   > **Server Selection**: You can connect to a specific MCP server by adding the `?server_name=XXX` query parameter, where `XXX` is the name of the server from your `mcp.json` configuration. For example: `http://localhost:3000/mcp?server_name=your-server`
+<!-- <video src="https://github.com/user-attachments/assets/2c3afaf9-6c08-436e-9efd-db8710554430"></video> TODO: ADD OUR VIDEO -->
 
-   **Connect with your preferred AI client:**
+**Supports all MCP Connection Types:**
 
-   | Client                                                                                                                                                                  | Link                                                    |
-   | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-   | <img src="https://claude.ai/favicon.ico" alt="Claude" width="14" height="14"> **Claude**                                                                                | [claude.ai](https://claude.ai)                          |
-   | <img src="https://www.cursor.com/favicon.ico" alt="Cursor"  width="14" height="14"> **Cursor**                                                                          | [cursor.com](https://cursor.com)                        |
-   | <img src="https://codeium.com/favicon.ico" alt="Windsurf"  width="14" height="14"> **Windsurf**                                                                         | [codeium.com/windsurf](https://codeium.com/windsurf)    |
-   | <img src="https://code.visualstudio.com/assets/favicon.ico" alt="VSCode" width="14" height="14"> **VSCode**                                                             | [code.visualstudio.com](https://code.visualstudio.com/) |
-   | <img src="https://cline.bot/assets/icons/favicon-256x256.png" alt="Cline"  width="14" height="14"> **Cline**                                                            | [cline.tools](https://cline.tools)                      |
-   | <img src="https://highlightai.com/favicon.ico" alt="Highlight AI"  width="14" height="14"> **Highlight AI**                                                             | [highlightai.com](https://highlightai.com)              |
-   | <img src="https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png" alt="Augment Code" width="14" height="14"> **Augment Code** | [augmentcode.com](https://augmentcode.com)              |
+- **STDIO**: Standard input/output MCP servers
+- **StreamableHTTP**: HTTP-based streaming connections via `http://localhost:3000/mcp` (or `https://<your-domain>/mcp` for hosted deployments)
+
+  > **Server Selection**: You can connect to a specific MCP server by adding the `?server_name=XXX` query parameter, where `XXX` is the name of the server from your `mcp.json` configuration. For example: `http://localhost:3000/mcp?server_name=your-server`
+
+  **Connect with your preferred AI client:**
+
+  | Client                                                                                                                                                                  | Link                                                    |
+  | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+  | <img src="https://claude.ai/favicon.ico" alt="Claude" width="14" height="14"> **Claude**                                                                                | [claude.ai](https://claude.ai)                          |
+  | <img src="https://www.cursor.com/favicon.ico" alt="Cursor"  width="14" height="14"> **Cursor**                                                                          | [cursor.com](https://cursor.com)                        |
+  | <img src="https://codeium.com/favicon.ico" alt="Windsurf"  width="14" height="14"> **Windsurf**                                                                         | [codeium.com/windsurf](https://codeium.com/windsurf)    |
+  | <img src="https://code.visualstudio.com/assets/favicon.ico" alt="VSCode" width="14" height="14"> **VSCode**                                                             | [code.visualstudio.com](https://code.visualstudio.com/) |
+  | <img src="https://cline.bot/assets/icons/favicon-256x256.png" alt="Cline"  width="14" height="14"> **Cline**                                                            | [cline.tools](https://cline.tools)                      |
+  | <img src="https://highlightai.com/favicon.ico" alt="Highlight AI"  width="14" height="14"> **Highlight AI**                                                             | [highlightai.com](https://highlightai.com)              |
+  | <img src="https://cdn.prod.website-files.com/66d76c2202b335e39ad2b5e8/66f302d663108ca67c19ddbc_Favicon.png" alt="Augment Code" width="14" height="14"> **Augment Code** | [augmentcode.com](https://augmentcode.com)              |
 
 ### Deploy
 
@@ -181,6 +194,15 @@ AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 > For other providers, see the [Auth.js Providers documentation](https://authjs.dev/reference/core/providers/).
 
 ### Advanced Configuration
+
+#### Command Line Options
+
+| Option         | Description                            | Default Value | Example                              |
+| -------------- | -------------------------------------- | ------------- | ------------------------------------ |
+| `--mcp-config` | Path to MCP servers configuration file | `./mcp.json`  | `--mcp-config ./config/servers.json` |
+| `--env-file`   | Path to environment variables file     | `./.env`      | `--env-file ./config/production.env` |
+
+#### Environment Variables
 
 | Environment Variable     | Description                                                                                                        | Default Value           | Required |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------- | -------- |
