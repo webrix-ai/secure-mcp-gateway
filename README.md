@@ -19,6 +19,10 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
 
 **mcp-gateway** is a secure gateway and integration layer for the **Model Context Protocol (MCP)**. It provides a unified, enterprise-ready interface for connecting, managing, and extending MCP modules and services, with a focus on security and seamless integration.
 
+<p align="center">
+  <img src="docs/assets/finalmov.webp" alt="MCP Gateway Demo" />
+</p>
+
 ### Quick Start
 
 **1. Configure your MCP servers** - Create `mcp.json` file in your project:
