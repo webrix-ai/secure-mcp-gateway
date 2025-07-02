@@ -17,7 +17,7 @@
 
 The **Model Context Protocol (MCP)** is a standardized protocol that enables AI applications to securely connect to external data sources and tools. However, by default, MCP servers often lack enterprise-grade authentication mechanisms. This is where **MCP authentication** becomes crucial.
 
-**MCP-S Gateway** is a free, open-source OAuth gateway that adds secure authentication to any MCP server, enabling you to:
+**MCP-S Gateway** is a free, open-source SSO gateway that adds secure authentication to any MCP server, enabling you to:
 
 - Connect your Identity Provider (IDP) to MCP servers
 - Implement Single Sign-On (SSO) for all MCP interactions
@@ -48,8 +48,6 @@ Before setting up Okta authentication for your MCP servers, ensure you have:
 
 ## Setting up Okta for MCP Authentication
 
-### Step 1: Create an Okta OAuth Application
-
 1. **Login to [Okta Admin Console](https://developer.okta.com/)**
 
    - Navigate to your Okta domain admin panel
@@ -76,9 +74,11 @@ Before setting up Okta authentication for your MCP servers, ensure you have:
    - Copy the **Client Secret**
    - Note your **Issuer URL**
 
-[Full Okta OIDC setup guide →](https://authjs.dev/reference/core/providers/okta)
+[Full Okta OIDC setup guide →](https://authjs.dev/reference/core/providers/okta#setup)
 
-### Step 2: Configure Okta Authorization Provider
+## Installing MCP-S Gateway
+
+1. **Configure env file**
 
 Create a `.env` file:
 
@@ -92,13 +92,41 @@ AUTH_OKTA_ISSUER=https://your-okta-domain.okta.com/oauth2/default
 
 > Generate `AUTH_SECRET` with: `openssl rand -base64 33`
 
-### Step 3: Configure MCP Servers
+2. **Configure your MCP Servers**
 
 Create an `mcp.json` file to define your MCP servers:
+
+> These sensitive tokens are never exposed to your users
 
 ```json
 {
   "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only",
+        "--project-ref=<project-ref>"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "<personal-access-token>"
+      }
+    },
+    "notionApi": {
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer ntn_****\", \"Notion-Version\": \"2022-06-28\" }"
+      }
+    },
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@tacticlaunch/mcp-linear"],
+      "env": {
+        "LINEAR_API_TOKEN": "<YOUR_TOKEN>"
+      }
+    },
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
@@ -107,7 +135,7 @@ Create an `mcp.json` file to define your MCP servers:
 }
 ```
 
-### Step 4: Start the Secure MCP Gateway
+3. **Start the Secure MCP Gateway**
 
 ```bash
 npx @mcp-s/secure-mcp-gateway --envfile <path-to-env> --mcp-config <path-to-mcp-config>
@@ -115,7 +143,7 @@ npx @mcp-s/secure-mcp-gateway --envfile <path-to-env> --mcp-config <path-to-mcp-
 
 ## Testing Your Setup
 
-### Step 1: Verify Gateway Health
+1. **Verify Gateway Health**
 
 ```bash
 # Check if the gateway is running
@@ -125,37 +153,29 @@ curl http://localhost:3000
 # {"message":"Hello from MCP-S","session":null}
 ```
 
-If you're opening the URL on the browser and get the error:
+2. **Test Authentication Flow**
 
-```bash
-[auth][cause]: Error: no matching decryption secret
-```
+   - **Access the Gateway**
 
-You probably need to clean your cookies 🍪 :)
+     - Open `http://localhost:3000/auth/signin` in your browser
+     - You should be redirected to Okta login
 
-### Step 2: Test Authentication Flow
+   - **Go to your MCP Client (e.g. Cursor)**
+     - Add to the MCP servers' config:
 
-1. **Access the Gateway**
+   ```json
+   {
+     "mcpServers": {
+       "okta-mcp-gateway": {
+         "url": "http://localhost:3000/mcp"
+       }
+     }
+   }
+   ```
 
-   - Open `http://localhost:3000/auth/signin` in your browser
-   - You should be redirected to Okta login
-
-2. **Go to your MCP Client (e.g. Cursor)**
-   - Add to the MCP servers' config:
-
-```json
-{
-  "mcpServers": {
-    "okta-mcp-gateway": {
-      "url": "http://localhost:3000/mcp"
-    }
-  }
-}
-```
-
-3. **Login**
-   - Cursor now has a "Needs Login" button next to the mcp
-   - Authenticate
+   - **Login**
+     - Cursor now has a "Needs Login" button next to the mcp
+     - Authenticate
 
 Enjoy your tools! 🎉
 
@@ -182,13 +202,22 @@ AUTH_OKTA_ISSUER=https://your-domain.okta.com/oauth2/default
 
 **Solution:** Ensure only one Cursor window is open when establishing the MCP connection.
 
+#### Issue: "In my browser, I get an error"
+
+If you're opening the URL on the browser and get the error:
+
+```bash
+[auth][cause]: Error: no matching decryption secret
+```
+
+**Solution:** You probably need to clean your cookies 🍪 :)
+
 ## Support and Community
 
 ### Getting Help
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/webrix-ai/mcp-gateway/issues)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/mcp-s-ai/secure-mcp-gateway/issues)
 - **Community Slack**: [Join our Slack workspace](https://join.slack.com/t/mcp-s/shared_invite/zt-388bm69k5-dACbMA5AwLKhNkdg4GwzLQ)
-- **Documentation**: [Official docs](https://www.mcp-s.com)
 
 ## Conclusion
 
@@ -205,7 +234,7 @@ The MCP-S Gateway bridges the gap between powerful MCP servers and enterprise se
 
 ## Related Resources
 
-- [MCP-S Gateway GitHub Repository](https://github.com/webrix-ai/mcp-gateway)
+- [MCP-S Gateway GitHub Repository](https://github.com/mcp-s-ai/secure-mcp-gateway)
 - [Auth.js Okta Provider Documentation](https://authjs.dev/reference/core/providers/okta)
 - [Model Context Protocol Specification](https://modelcontextprotocol.io/)
-- [Okta Developer Documentation](https://developer.okta.com/)
+- [Okta Developer Console](https://developer.okta.com/)
