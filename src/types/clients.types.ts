@@ -11,7 +11,10 @@ export interface ClientInfo {
   client_secret_expires_at?: number
 }
 
-export type User = DefaultUser;
+export type User = DefaultUser & {
+  // OAuth provider access token (e.g., GitHub access token)
+  oauthAccessToken?: string;
+};
 
 export interface Credentials {
     access_token: string,

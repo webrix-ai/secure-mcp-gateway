@@ -36,6 +36,10 @@ A secure, open-source OAuth gateway for MCP authentication</h1>
       "env": {
         "API_KEY": "your-api-key"
       }
+    },
+    "octocode": {
+      "command": "npx",
+      "args": ["octocode-mcp"]
     }
   }
 }
@@ -180,6 +184,31 @@ AUTH_AZURE_AD_ID=your-azure-client-id
 AUTH_AZURE_AD_SECRET=your-azure-client-secret
 AUTH_AZURE_AD_TENANT_ID=your-tenant-id-or-common
 ```
+
+</details>
+
+<details>
+<summary>GitHub OAuth Setup</summary>
+
+**Documentation**: [Auth.js GitHub Provider](https://authjs.dev/reference/core/providers/github)
+
+GitHub OAuth is particularly useful for MCP servers that interact with GitHub repositories, such as Octocode. When using GitHub OAuth, you can specify scopes to control what permissions your MCP servers have access to.
+
+```env
+AUTH_SECRET=your-random-secret
+AUTH_PROVIDER=github
+AUTH_GITHUB_ID=your-github-client-id
+AUTH_GITHUB_SECRET=your-github-client-secret
+AUTH_GITHUB_SCOPES=repo
+```
+
+**Common GitHub Scopes:**
+- `repo` - Full access to repositories (public and private)
+- `public_repo` - Access to public repositories only
+- `read:user` - Read access to user profile information
+- `user:email` - Access to user email addresses
+
+For Octocode and similar MCP servers that need repository access, the `repo` scope is typically required.
 
 </details>
 

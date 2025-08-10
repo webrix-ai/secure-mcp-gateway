@@ -17,6 +17,7 @@ import {
 } from "../services/mcp-client.js"
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js"
 import { mcpAuthProvider } from "../services/mcp-auth-provider.js"
+import { getOAuthAccessTokenByMcpToken } from "../services/db.js"
 import { envVars } from "../libs/config.js"
 
 const mcpRouter = Router()
@@ -82,29 +83,40 @@ mcpRouter.post(
             request,
             authInfo,
           })
+          
+          // Get OAuth access token from the authenticated user
+          const oauthAccessToken = authInfo?.token ? getOAuthAccessTokenByMcpToken(authInfo.token) : null
+          
+          console.log("oauthAccessToken", oauthAccessToken)
           const toolMap = new Map<string, Tool>()
           const clientName = req.query.server_name as string | undefined
           const clients = clientName
             ? [
                 {
                   name: clientName,
-                  client: await findMcpClientByName(clientName),
+                  client: await findMcpClientByName(clientName, oauthAccessToken || undefined),
                 },
               ]
-            : getAllMcpClients()
+            : await getAllMcpClients(oauthAccessToken || undefined)
 
           await Promise.all(
             clients.map(async ({ name, client }) => {
-              const { tools } = await client.listTools()
-              tools.forEach((tool) => {
-                toolMap.set(`${name}:${tool.name}`, {
-                  name: tool.name,
-                  description: tool.description,
-                  inputSchema: tool.inputSchema || {
-                    type: "object",
-                  },
-                })
-              })
+              if (client) {
+                try {
+                  const { tools } = await client.listTools()
+                  tools.forEach((tool) => {
+                    toolMap.set(`${name}:${tool.name}`, {
+                      name: tool.name,
+                      description: tool.description,
+                      inputSchema: tool.inputSchema || {
+                        type: "object",
+                      },
+                    })
+                  })
+                } catch (error) {
+                  console.error(`Error listing tools for ${name}:`, error)
+                }
+              }
             }),
           )
           return {
@@ -121,7 +133,10 @@ mcpRouter.post(
             authInfo,
           })
 
-          const client = findMcpClientByToolName(request.params.name)
+          // Get OAuth access token from the authenticated user
+          const oauthAccessToken = authInfo?.token ? getOAuthAccessTokenByMcpToken(authInfo.token) : null
+
+          const client = await findMcpClientByToolName(request.params.name, oauthAccessToken || undefined)
           if (!client) {
             return {
               error: {
@@ -130,12 +145,23 @@ mcpRouter.post(
               },
             }
           }
-          const toolResponse = await client.callTool({
-            name: request.params.name,
-            arguments: request.params.arguments,
-          })
+          
+          try {
+            const toolResponse = await client.callTool({
+              name: request.params.name,
+              arguments: request.params.arguments,
+            })
 
-          return toolResponse
+            return toolResponse
+          } catch (error) {
+            console.error(`Error calling tool ${request.params.name}:`, error)
+            return {
+              error: {
+                code: -32000,
+                message: "Tool call failed",
+              },
+            }
+          }
         },
       )
 

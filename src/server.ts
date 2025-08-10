@@ -2,14 +2,15 @@ import { envVars } from "./libs/config.js"
 import express from "express"
 import { ExpressAuth } from "@auth/express"
 import { authSession } from "./libs/session.js"
-import { getAuthProvider } from "./libs/auth.js"
+import { getAuthConfig } from "./libs/auth.js"
 import { findMcpClientByName, getAllMcpClients } from "./services/mcp-client.js"
 import type { MCPTool } from "./types/tools.types.js"
 import { signTokens, verifyToken } from "./libs/tokens.js"
-import { createUser, getByAccessToken, updateUser } from "./services/db.js"
+import { createUser, getByAccessToken, updateUser, getOAuthAccessTokenByMcpToken } from "./services/db.js"
 import path from "path"
 import mcpRouter from "./routes/mcp.js"
 import type { User } from "./types/clients.types.js"
+import "./types/auth.types.js"
 
 const app = express()
 
@@ -21,12 +22,13 @@ app.get("/health", (_req, res) => {
 })
 
 // Auth
-app.use("/auth", ExpressAuth({ providers: [await getAuthProvider()] }))
+app.use("/auth", ExpressAuth(await getAuthConfig()))
 
 app.use(authSession)
 
 app.get("/authorized", (req, res) => {
   const { session } = res.locals
+  console.log("Full session object:", JSON.stringify(session, null, 2))
   const user: User | undefined = session?.user
   if (!user) {
     res.status(401).send({ error: "Unauthorized" })
@@ -44,16 +46,25 @@ app.get("/authorized", (req, res) => {
     if (!paredToken.token) {
       res.status(401).send({ error: "Unauthorized" })
     }
+    
+    // Get OAuth access token from session (e.g., GitHub token)
+    const oauthAccessToken = session?.accessToken as string
+
+    console.log("oauthAccessToken", oauthAccessToken)
+    
     createUser({
       client_id: paredToken.userAccessKey!,
       access_token: paredToken.token!,
-      user: user as User,
+      user: { ...user, oauthAccessToken } as User,
     })
   } else if (query.code) {
+    // Get OAuth access token from session (e.g., GitHub token)
+    const oauthAccessToken = session?.accessToken as string
+    
     updateUser({
       client_id: query.clientId!,
       code: query.code,
-      user: user as User,
+      user: { ...user, oauthAccessToken } as User,
     })
 
     if (query.callbackUrl) {
@@ -76,23 +87,38 @@ app.get("/", (_req, res) => {
   })
 })
 
-app.get("/tools", async (_req, res) => {
+app.get("/tools", async (req, res) => {
   const toolMap = new Map<string, MCPTool>()
 
+  // Get OAuth access token from authenticated user
+  const auth = req.headers["authorization"]
+  let oauthAccessToken: string | null = null
+  
+  if (auth) {
+    const [, mcpToken] = auth.split(":")
+    oauthAccessToken = getOAuthAccessTokenByMcpToken(mcpToken)
+  }
+
+  const mcpClients = await getAllMcpClients(oauthAccessToken || undefined)
+  
   await Promise.all(
-    getAllMcpClients().map(async ({ name, client }) => {
-      const { tools } = await client.listTools()
-      tools.forEach((tool) => {
-        toolMap.set(`${name}:${tool.name}`, {
-          name: tool.name,
-          slug: tool.name,
-          description: tool.description,
-          inputSchema: (tool.inputSchema as MCPTool["inputSchema"]) || {
-            type: "object",
-          },
-          integrationSlug: name,
+    mcpClients.map(async ({ name, client }) => {
+      try {
+        const { tools } = await client.listTools()
+        tools.forEach((tool) => {
+          toolMap.set(`${name}:${tool.name}`, {
+            name: tool.name,
+            slug: tool.name,
+            description: tool.description,
+            inputSchema: (tool.inputSchema as MCPTool["inputSchema"]) || {
+              type: "object",
+            },
+            integrationSlug: name,
+          })
         })
-      })
+      } catch (error) {
+        console.error(`Error listing tools for ${name}:`, error)
+      }
     }),
   )
 
@@ -132,19 +158,27 @@ app.post("/call/:integrationSlug/:toolSlug", async (req, res) => {
     return
   }
 
-  const mcpClient = await findMcpClientByName(integrationSlug)
+  // Get OAuth access token from database
+  const oauthAccessToken = getOAuthAccessTokenByMcpToken(token)
+
+  const mcpClient = await findMcpClientByName(integrationSlug, oauthAccessToken || undefined)
 
   if (!mcpClient) {
     res.status(404).send({ error: "Client not found" })
     return
   }
 
-  const toolResponse = await mcpClient.callTool({
-    name: toolSlug,
-    arguments: req.body,
-  })
+  try {
+    const toolResponse = await mcpClient.callTool({
+      name: toolSlug,
+      arguments: req.body,
+    })
 
-  res.json(toolResponse)
+    res.json(toolResponse)
+  } catch (error) {
+    console.error(`Error calling tool ${toolSlug}:`, error)
+    res.status(500).send({ error: "Tool call failed" })
+  }
 })
 
 export default app

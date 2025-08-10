@@ -166,3 +166,9 @@ export function updateCredentials({
     client_id,
   )
 }
+
+// Get OAuth access token (e.g., GitHub token) by MCP access token
+export function getOAuthAccessTokenByMcpToken(mcp_access_token: string): string | null {
+  const client = getByAccessToken(mcp_access_token)
+  return client?.user?.oauthAccessToken || null
+}

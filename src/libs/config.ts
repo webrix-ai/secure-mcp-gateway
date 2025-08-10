@@ -25,6 +25,9 @@ function getEnvVars() {
       : 60 * 60 * 24,
     AUTH_PROVIDER: process.env.AUTH_PROVIDER?.toLowerCase() || "google",
     DB_PATH: process.env.DB_PATH || "./mcp.sqlite",
+    AUTH_GITHUB_ID: process.env.AUTH_GITHUB_ID,
+    AUTH_GITHUB_SECRET: process.env.AUTH_GITHUB_SECRET,
+    AUTH_GITHUB_SCOPES: process.env.AUTH_GITHUB_SCOPES || "read:user,user:email",
   }
 }
 

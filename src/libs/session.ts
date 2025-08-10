@@ -1,6 +1,6 @@
 import { getSession } from "@auth/express"
 import type { NextFunction, Request, Response } from "express"
-import { getAuthProvider } from "./auth.js"
+import { getAuthConfig } from "./auth.js"
 
 export async function authSession(
   req: Request,
@@ -9,7 +9,7 @@ export async function authSession(
 ) {
   res.locals.session = await getSession(req, {
     basePath: "/auth",
-    providers: [await getAuthProvider()],
+    ...(await getAuthConfig())
   })
   next()
 }
