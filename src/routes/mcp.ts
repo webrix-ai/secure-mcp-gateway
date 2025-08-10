@@ -87,7 +87,6 @@ mcpRouter.post(
           // Get OAuth access token from the authenticated user
           const oauthAccessToken = authInfo?.token ? getOAuthAccessTokenByMcpToken(authInfo.token) : null
           
-          console.log("oauthAccessToken", oauthAccessToken)
           const toolMap = new Map<string, Tool>()
           const clientName = req.query.server_name as string | undefined
           const clients = clientName
