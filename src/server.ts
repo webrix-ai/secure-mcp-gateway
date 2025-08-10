@@ -28,7 +28,6 @@ app.use(authSession)
 
 app.get("/authorized", (req, res) => {
   const { session } = res.locals
-  console.log("Full session object:", JSON.stringify(session, null, 2))
   const user: User | undefined = session?.user
   if (!user) {
     res.status(401).send({ error: "Unauthorized" })
@@ -49,8 +48,6 @@ app.get("/authorized", (req, res) => {
     
     // Get OAuth access token from session (e.g., GitHub token)
     const oauthAccessToken = session?.accessToken as string
-
-    console.log("oauthAccessToken", oauthAccessToken)
     
     createUser({
       client_id: paredToken.userAccessKey!,

@@ -92,7 +92,6 @@ describe("MCP Auth Provider", () => {
       },
       res as unknown as import("express").Response,
     )
-    console.log("Redirected URL:", redirectedUrl)
     const url = new URL(redirectedUrl);
     const callbackUrl = url.searchParams.get("callbackUrl");
     assert(callbackUrl, "callbackUrl param should exist in redirect");
@@ -136,7 +135,6 @@ describe("MCP Auth Provider", () => {
       "verifier",
       "http://localhost/callback",
     )
-    console.log("creds", creds)
     assert(typeof creds.access_token === "string")
     assert(typeof creds.refresh_token === "string")
     assert.equal(creds.token_type, "Bearer")

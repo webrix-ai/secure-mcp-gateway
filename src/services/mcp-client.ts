@@ -124,11 +124,6 @@ const ensureMcpClientsForToken = async (accessToken: string) => {
         if (accessToken && accessToken !== '__default__') {
           envVars.Authorization = `Bearer ${accessToken}`
         }
-        console.log("stdio", {
-          command: server.command,
-          args: server.args,
-          env: envVars,
-        })
         transport = new StdioClientTransport({
           command: server.command,
           args: server.args,
