@@ -6,7 +6,8 @@ import { getAllMcpClients } from "../src/services/mcp-client.ts"
 
 describe("MCP Gateway", () => {
   after(async () => {
-    getAllMcpClients().forEach(({ client }) => {
+    const clients = await getAllMcpClients()
+    clients.forEach(({ client }) => {
       client.transport?.close()
       client.close()
     })

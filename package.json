@@ -20,7 +20,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "tsx src/index.ts",
-    "test": "node --test --test-concurrency=1",
+    "test": "tsx --test --test-concurrency=1 test/*.test.ts",
     "test:local": "./scripts/test-local.sh",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
