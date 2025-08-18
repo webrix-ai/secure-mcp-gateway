@@ -1,17 +1,30 @@
 import { envVars } from "./config.js"
+import type { JWT } from "@auth/core/jwt"
+import type { Session } from "@auth/core/types"
+import type { Account, User, Profile } from "@auth/core/types"
+import type { AdapterUser } from "@auth/core/adapters"
+import type { Provider } from "@auth/core/providers"
 
 export const getAuthConfig = async () => {
   return {
-    providers: [await getAuthProvider()],
+    providers: [await getAuthProvider()] as Provider[],
     callbacks: {
-      jwt: async ({ token, account }: any) => {
+      jwt: async ({ token, account }: { 
+        token: JWT; 
+        user: User | AdapterUser; 
+        account?: Account | null | undefined; 
+        profile?: Profile | undefined; 
+        trigger?: "signIn" | "signUp" | "update" | undefined; 
+        isNewUser?: boolean | undefined; 
+        session?: Session; 
+      }) => {
         // Save the access token in the JWT token
         if (account?.access_token) {
           token.accessToken = account.access_token
         }
         return token
       },
-      session: async ({ session, token }: any) => {
+      session: async ({ session, token }: { session: Session; token: JWT }) => {
         // Pass the access token to the session
         if (token.accessToken) {
           session.accessToken = token.accessToken as string
@@ -22,7 +35,7 @@ export const getAuthConfig = async () => {
   }
 }
 
-export const getAuthProvider = async () => {
+export const getAuthProvider = async (): Promise<Provider> => {
   const provider = envVars.AUTH_PROVIDER
   
   // Special handling for GitHub provider with custom configuration
