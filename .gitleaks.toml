@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+paths = [
+  '''gitleaks''',
+  '''.env.example''',
+  '''example.env'''
+]
+regexes = ['''^E\/MAdDq0B1aX\+MGNyVlEUk0WzRpCdimlCrUOKST1CxKH$''']
